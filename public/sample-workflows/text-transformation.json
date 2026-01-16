@@ -1,0 +1,84 @@
+{
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "start",
+      "position": { "x": 100, "y": 200 },
+      "data": {
+        "label": "Start",
+        "config": {
+          "payload": {
+            "message": "hello world",
+            "count": 5
+          }
+        },
+        "nodeType": "start"
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "transform",
+      "position": { "x": 380, "y": 200 },
+      "data": {
+        "label": "Uppercase",
+        "config": {
+          "operation": "uppercase",
+          "field": "message",
+          "value": ""
+        },
+        "nodeType": "transform"
+      }
+    },
+    {
+      "id": "node_3",
+      "type": "transform",
+      "position": { "x": 660, "y": 200 },
+      "data": {
+        "label": "Append Exclamation",
+        "config": {
+          "operation": "append",
+          "field": "message",
+          "value": "!!!"
+        },
+        "nodeType": "transform"
+      }
+    },
+    {
+      "id": "node_4",
+      "type": "end",
+      "position": { "x": 940, "y": 200 },
+      "data": {
+        "label": "End",
+        "config": {
+          "label": "End"
+        },
+        "nodeType": "end"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_node_1_node_2",
+      "source": "node_1",
+      "target": "node_2",
+      "animated": true
+    },
+    {
+      "id": "edge_node_2_node_3",
+      "source": "node_2",
+      "target": "node_3",
+      "animated": true
+    },
+    {
+      "id": "edge_node_3_node_4",
+      "source": "node_3",
+      "target": "node_4",
+      "animated": true
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

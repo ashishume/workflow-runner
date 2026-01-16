@@ -1,0 +1,124 @@
+{
+  "nodes": [
+    {
+      "id": "node_start",
+      "type": "start",
+      "position": { "x": 100, "y": 220 },
+      "data": {
+        "label": "Start",
+        "config": {
+          "payload": {
+            "score": 75,
+            "student": "John Doe"
+          }
+        },
+        "nodeType": "start"
+      }
+    },
+    {
+      "id": "node_condition",
+      "type": "condition",
+      "position": { "x": 380, "y": 200 },
+      "data": {
+        "label": "Check Score",
+        "config": {
+          "field": "score",
+          "operator": "greaterThan",
+          "value": "50"
+        },
+        "nodeType": "condition"
+      }
+    },
+    {
+      "id": "node_pass_transform",
+      "type": "transform",
+      "position": { "x": 700, "y": 100 },
+      "data": {
+        "label": "Add Pass Status",
+        "config": {
+          "operation": "replace",
+          "field": "status",
+          "value": "PASSED"
+        },
+        "nodeType": "transform"
+      }
+    },
+    {
+      "id": "node_fail_transform",
+      "type": "transform",
+      "position": { "x": 700, "y": 320 },
+      "data": {
+        "label": "Add Fail Status",
+        "config": {
+          "operation": "replace",
+          "field": "status",
+          "value": "FAILED"
+        },
+        "nodeType": "transform"
+      }
+    },
+    {
+      "id": "node_end_pass",
+      "type": "end",
+      "position": { "x": 980, "y": 100 },
+      "data": {
+        "label": "End (Pass)",
+        "config": {
+          "label": "End (Pass)"
+        },
+        "nodeType": "end"
+      }
+    },
+    {
+      "id": "node_end_fail",
+      "type": "end",
+      "position": { "x": 980, "y": 320 },
+      "data": {
+        "label": "End (Fail)",
+        "config": {
+          "label": "End (Fail)"
+        },
+        "nodeType": "end"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_start_condition",
+      "source": "node_start",
+      "target": "node_condition",
+      "animated": true
+    },
+    {
+      "id": "edge_condition_pass",
+      "source": "node_condition",
+      "target": "node_pass_transform",
+      "sourceHandle": "true",
+      "animated": true
+    },
+    {
+      "id": "edge_condition_fail",
+      "source": "node_condition",
+      "target": "node_fail_transform",
+      "sourceHandle": "false",
+      "animated": true
+    },
+    {
+      "id": "edge_pass_end",
+      "source": "node_pass_transform",
+      "target": "node_end_pass",
+      "animated": true
+    },
+    {
+      "id": "edge_fail_end",
+      "source": "node_fail_transform",
+      "target": "node_end_fail",
+      "animated": true
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}
