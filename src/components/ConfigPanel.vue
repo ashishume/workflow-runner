@@ -276,7 +276,7 @@ const closePanel = () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .config-panel {
   width: 320px;
   background: var(--panel-bg);
@@ -292,19 +292,19 @@ const closePanel = () => {
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-color);
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
 }
 
 .header-content {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.panel-header h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 .node-type-badge {
@@ -314,26 +314,26 @@ const closePanel = () => {
   padding: 4px 8px;
   border-radius: 4px;
   letter-spacing: 0.5px;
-}
 
-.node-type-badge.start {
-  background: rgba(74, 222, 128, 0.2);
-  color: #4ade80;
-}
+  &.start {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+  }
 
-.node-type-badge.transform {
-  background: rgba(167, 139, 250, 0.2);
-  color: #a78bfa;
-}
+  &.transform {
+    background: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+  }
 
-.node-type-badge.condition {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-}
+  &.condition {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+  }
 
-.node-type-badge.end {
-  background: rgba(248, 113, 113, 0.2);
-  color: #f87171;
+  &.end {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+  }
 }
 
 .close-btn {
@@ -348,11 +348,11 @@ const closePanel = () => {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-}
 
-.close-btn:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
+  &:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+  }
 }
 
 .panel-content {
@@ -368,46 +368,43 @@ const closePanel = () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
 
-.form-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 10px 12px;
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
+  input,
+  select,
+  textarea {
+    padding: 10px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s ease;
 
-.form-group textarea {
-  font-family: 'Monaco', 'Consolas', monospace;
-  resize: vertical;
-  min-height: 100px;
-}
+    &:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
-}
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: var(--text-tertiary);
+  textarea {
+    font-family: 'Monaco', 'Consolas', monospace;
+    resize: vertical;
+    min-height: 100px;
+  }
 }
 
 .error-text {
@@ -436,12 +433,12 @@ const closePanel = () => {
   gap: 8px;
   font-size: 12px;
   color: var(--text-secondary);
-}
 
-.branch-indicator .indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
 }
 
 .true-branch .indicator {
@@ -459,23 +456,23 @@ const closePanel = () => {
   text-align: center;
   padding: 24px;
   color: var(--text-secondary);
-}
 
-.end-info svg {
-  margin-bottom: 16px;
-  color: #f87171;
-}
+  svg {
+    margin-bottom: 16px;
+    color: #f87171;
+  }
 
-.end-info p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-}
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
 
-.end-info .sub-info {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--text-tertiary);
+  .sub-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
 }
 
 .panel-footer {
@@ -498,10 +495,10 @@ const closePanel = () => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-}
 
-.delete-btn:hover {
-  background: rgba(248, 113, 113, 0.2);
-  border-color: #f87171;
+  &:hover {
+    background: rgba(248, 113, 113, 0.2);
+    border-color: #f87171;
+  }
 }
 </style>

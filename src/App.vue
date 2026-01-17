@@ -37,7 +37,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .app {
   display: flex;
   flex-direction: column;

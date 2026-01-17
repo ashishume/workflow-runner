@@ -46,7 +46,7 @@ const payloadPreview = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .node {
   background: var(--node-bg, #1a1a2e);
   border: 2px solid var(--node-border, #16213e);
@@ -54,16 +54,16 @@ const payloadPreview = computed(() => {
   min-width: 180px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
-}
 
-.node:hover {
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
-}
+  &:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+  }
 
-.node.selected {
-  border-color: var(--accent-color, #00d4ff);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  &.selected {
+    border-color: var(--accent-color, #00d4ff);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
 }
 
 .start-node {

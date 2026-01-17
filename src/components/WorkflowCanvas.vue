@@ -239,16 +239,16 @@ const nodeColor = (node: { type?: string }) => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .workflow-canvas {
   flex: 1;
   position: relative;
   background: var(--canvas-bg);
   overflow: hidden;
-}
 
-.workflow-canvas.drag-over {
-  background: color-mix(in srgb, var(--accent-color) 5%, var(--canvas-bg));
+  &.drag-over {
+    background: color-mix(in srgb, var(--accent-color) 5%, var(--canvas-bg));
+  }
 }
 
 .drop-overlay {
@@ -270,18 +270,18 @@ const nodeColor = (node: { type?: string }) => {
   gap: 12px;
   color: var(--accent-color);
   animation: bounce 1s infinite;
+
+  span {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 }
 
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
-}
-
-.drop-indicator span {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 .empty-state {
@@ -299,26 +299,26 @@ const nodeColor = (node: { type?: string }) => {
   align-items: center;
   text-align: center;
   color: var(--text-tertiary);
+
+  svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  p {
+    margin: 8px 0 0;
+    font-size: 14px;
+  }
 }
 
-.empty-content svg {
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.empty-content h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.empty-content p {
-  margin: 8px 0 0;
-  font-size: 14px;
-}
-
-/* Connection error toast */
+// Connection error toast
 .connection-error-toast {
   position: absolute;
   bottom: 80px;
@@ -337,6 +337,7 @@ const nodeColor = (node: { type?: string }) => {
   z-index: 1000;
 }
 
+// Toast transitions
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.3s ease;
@@ -349,62 +350,62 @@ const nodeColor = (node: { type?: string }) => {
 }
 </style>
 
-<style>
-/* Vue Flow overrides */
+<style lang="scss">
+// Vue Flow overrides
 .vue-flow {
   background: transparent !important;
-}
 
-.vue-flow__minimap {
-  background: var(--panel-bg) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 8px !important;
-}
+  &__minimap {
+    background: var(--panel-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+  }
 
-.vue-flow__controls {
-  background: var(--panel-bg) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 8px !important;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-}
+  &__controls {
+    background: var(--panel-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  }
 
-.vue-flow__controls-button {
-  background: transparent !important;
-  border: none !important;
-  border-bottom: 1px solid var(--border-color) !important;
-  color: var(--text-secondary) !important;
-  transition: all 0.2s ease !important;
-}
+  &__controls-button {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    transition: all 0.2s ease !important;
 
-.vue-flow__controls-button:hover {
-  background: var(--hover-bg) !important;
-  color: var(--text-primary) !important;
-}
+    &:hover {
+      background: var(--hover-bg) !important;
+      color: var(--text-primary) !important;
+    }
 
-.vue-flow__controls-button:last-child {
-  border-bottom: none !important;
-}
+    &:last-child {
+      border-bottom: none !important;
+    }
 
-.vue-flow__controls-button svg {
-  fill: currentColor !important;
-}
+    svg {
+      fill: currentColor !important;
+    }
+  }
 
-.vue-flow__edge-path {
-  stroke: var(--accent-color) !important;
-}
+  &__edge-path {
+    stroke: var(--accent-color) !important;
+  }
 
-.vue-flow__edge.selected .vue-flow__edge-path {
-  stroke: #fff !important;
-}
+  &__edge.selected &__edge-path {
+    stroke: #fff !important;
+  }
 
-.vue-flow__arrowhead polyline {
-  stroke: var(--accent-color) !important;
-  fill: var(--accent-color) !important;
-}
+  &__arrowhead polyline {
+    stroke: var(--accent-color) !important;
+    fill: var(--accent-color) !important;
+  }
 
-.vue-flow__connection-line {
-  stroke: var(--accent-color) !important;
-  stroke-dasharray: 5 5 !important;
+  &__connection-line {
+    stroke: var(--accent-color) !important;
+    stroke-dasharray: 5 5 !important;
+  }
 }
 </style>

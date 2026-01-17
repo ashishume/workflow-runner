@@ -1,56 +1,53 @@
 <script setup lang="ts">
-import { Handle, Position } from '@vue-flow/core'
-import { computed } from 'vue'
-import type { ConditionNodeConfig } from '../../types/workflow'
-import { BranchIcon } from '../../assets/icons'
+import { Handle, Position } from "@vue-flow/core";
+import { computed } from "vue";
+import type { ConditionNodeConfig } from "../../types/workflow";
+import { BranchIcon } from "../../assets/icons";
 
 const props = defineProps<{
-  id: string
+  id: string;
   data: {
-    label: string
-    config: ConditionNodeConfig
-    nodeType: string
-  }
-  selected: boolean
-}>()
+    label: string;
+    config: ConditionNodeConfig;
+    nodeType: string;
+  };
+  selected: boolean;
+}>();
 
 const conditionLabel = computed(() => {
-  const config = props.data.config
+  const config = props.data.config;
   const opLabels: Record<string, string> = {
-    'equals': '==',
-    'notEquals': '!=',
-    'contains': 'contains',
-    'greaterThan': '>',
-    'lessThan': '<',
-    'greaterThanOrEqual': '>=',
-    'lessThanOrEqual': '<=',
-    'isEmpty': 'is empty',
-    'isNotEmpty': 'is not empty',
-    'isEven': 'is even',
-    'isOdd': 'is odd',
-    'isDivisibleBy': '% ='
-  }
-  
+    equals: "==",
+    notEquals: "!=",
+    contains: "contains",
+    greaterThan: ">",
+    lessThan: "<",
+    greaterThanOrEqual: ">=",
+    lessThanOrEqual: "<=",
+    isEmpty: "is empty",
+    isNotEmpty: "is not empty",
+    isEven: "is even",
+    isOdd: "is odd",
+    isDivisibleBy: "% =",
+  };
+
   // Operators that don't need a value
-  if (['isEmpty', 'isNotEmpty', 'isEven', 'isOdd'].includes(config.operator)) {
-    return `${config.field} ${opLabels[config.operator]}`
+  if (["isEmpty", "isNotEmpty", "isEven", "isOdd"].includes(config.operator)) {
+    return `${config.field} ${opLabels[config.operator]}`;
   }
   // Special display for divisibility
-  if (config.operator === 'isDivisibleBy') {
-    return `${config.field} % ${config.value} == 0`
+  if (config.operator === "isDivisibleBy") {
+    return `${config.field} % ${config.value} == 0`;
   }
-  return `${config.field} ${opLabels[config.operator]} "${config.value}"`
-})
+  return `${config.field} ${opLabels[config.operator]} "${config.value}"`;
+});
 </script>
 
 <template>
-  <div 
-    class="node condition-node"
-    :class="{ selected }"
-  >
-    <Handle 
-      type="target" 
-      :position="Position.Left" 
+  <div class="node condition-node" :class="{ selected }">
+    <Handle
+      type="target"
+      :position="Position.Left"
       class="handle handle-target"
     />
     <div class="node-header">
@@ -65,19 +62,19 @@ const conditionLabel = computed(() => {
     <div class="output-handles">
       <div class="output-handle-wrapper true-handle">
         <span class="handle-label">True</span>
-        <Handle 
+        <Handle
           id="true"
-          type="source" 
-          :position="Position.Right" 
+          type="source"
+          :position="Position.Right"
           class="handle handle-source handle-true"
         />
       </div>
       <div class="output-handle-wrapper false-handle">
         <span class="handle-label">False</span>
-        <Handle 
+        <Handle
           id="false"
-          type="source" 
-          :position="Position.Right" 
+          type="source"
+          :position="Position.Right"
           class="handle handle-source handle-false"
         />
       </div>
@@ -85,7 +82,7 @@ const conditionLabel = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .node {
   background: var(--node-bg, #1a1a2e);
   border: 2px solid var(--node-border, #16213e);
@@ -93,16 +90,16 @@ const conditionLabel = computed(() => {
   min-width: 200px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
-}
 
-.node:hover {
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
-}
+  &:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+  }
 
-.node.selected {
-  border-color: var(--accent-color, #00d4ff);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  &.selected {
+    border-color: var(--accent-color, #00d4ff);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
 }
 
 .condition-node {
@@ -144,7 +141,7 @@ const conditionLabel = computed(() => {
 .condition-preview {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
-  font-family: 'Monaco', 'Consolas', monospace;
+  font-family: "Monaco", "Consolas", monospace;
   background: rgba(0, 0, 0, 0.2);
   padding: 6px 8px;
   border-radius: 4px;

@@ -122,7 +122,7 @@ const clearLogs = () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .execution-logs {
   background: var(--panel-bg);
   border-top: 1px solid var(--border-color);
@@ -137,10 +137,10 @@ const clearLogs = () => {
   padding: 12px 20px;
   cursor: pointer;
   transition: background 0.2s ease;
-}
 
-.logs-header:hover {
-  background: var(--hover-bg);
+  &:hover {
+    background: var(--hover-bg);
+  }
 }
 
 .header-left {
@@ -148,13 +148,13 @@ const clearLogs = () => {
   align-items: center;
   gap: 10px;
   color: var(--text-secondary);
-}
 
-.header-left h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
 }
 
 .log-count {
@@ -203,20 +203,20 @@ const clearLogs = () => {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-}
 
-.clear-btn:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
+  &:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+  }
 }
 
 .expand-icon {
   color: var(--text-secondary);
   transition: transform 0.3s ease;
-}
 
-.expand-icon.rotated {
-  transform: rotate(180deg);
+  &.rotated {
+    transform: rotate(180deg);
+  }
 }
 
 .logs-content {
@@ -232,23 +232,23 @@ const clearLogs = () => {
   padding: 32px;
   color: var(--text-tertiary);
   text-align: center;
-}
 
-.empty-state svg {
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
+  svg {
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
 
-.empty-state p {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
+  p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
 
-.empty-state span {
-  margin-top: 4px;
-  font-size: 12px;
+  span {
+    margin-top: 4px;
+    font-size: 12px;
+  }
 }
 
 .logs-list {
@@ -259,6 +259,11 @@ const clearLogs = () => {
 .log-entry {
   display: flex;
   gap: 12px;
+
+  &.error .log-message {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+  }
 }
 
 .log-timeline {
@@ -317,11 +322,6 @@ const clearLogs = () => {
   padding: 6px 10px;
   background: var(--card-bg);
   border-radius: 4px;
-}
-
-.log-entry.error .log-message {
-  background: rgba(248, 113, 113, 0.1);
-  color: #f87171;
 }
 
 .log-data {

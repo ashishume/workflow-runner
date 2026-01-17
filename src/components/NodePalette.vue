@@ -106,7 +106,7 @@ const onDragEnd = () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .node-palette {
   width: 280px;
   background: var(--panel-bg);
@@ -119,14 +119,14 @@ const onDragEnd = () => {
 .palette-header {
   padding: 20px;
   border-bottom: 1px solid var(--border-color);
-}
 
-.palette-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
 }
 
 .palette-hint {
@@ -155,21 +155,25 @@ const onDragEnd = () => {
   cursor: grab;
   transition: all 0.2s ease;
   position: relative;
-}
 
-.node-item:hover {
-  border-color: var(--node-color);
-  background: var(--card-hover-bg);
-  transform: translateX(4px);
-}
+  &:hover {
+    border-color: var(--node-color);
+    background: var(--card-hover-bg);
+    transform: translateX(4px);
 
-.node-item:active {
-  cursor: grabbing;
-}
+    .drag-indicator {
+      opacity: 1;
+    }
+  }
 
-.node-item.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
+  &:active {
+    cursor: grabbing;
+  }
+
+  &.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
 }
 
 .node-icon {
@@ -210,9 +214,5 @@ const onDragEnd = () => {
   color: var(--text-tertiary);
   opacity: 0;
   transition: opacity 0.2s ease;
-}
-
-.node-item:hover .drag-indicator {
-  opacity: 1;
 }
 </style>
