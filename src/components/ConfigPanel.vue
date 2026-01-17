@@ -8,6 +8,7 @@ import type {
   TransformOperation,
   ConditionOperator 
 } from '../types/workflow'
+import { CloseIcon, ClockIcon, TrashIcon } from '../assets/icons'
 
 const store = useWorkflowStore()
 
@@ -142,10 +143,7 @@ const closePanel = () => {
         </span>
       </div>
       <button class="close-btn" @click="closePanel">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <CloseIcon :size="20" />
       </button>
     </div>
     
@@ -262,10 +260,7 @@ const closePanel = () => {
       <!-- End Node Config -->
       <template v-if="selectedNode.data.nodeType === 'end'">
         <div class="end-info">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
+          <ClockIcon :size="40" />
           <p>This node marks the end of a workflow branch.</p>
           <p class="sub-info">The final payload will be displayed in the execution logs when the workflow runs.</p>
         </div>
@@ -274,10 +269,7 @@ const closePanel = () => {
     
     <div class="panel-footer">
       <button class="delete-btn" @click="deleteNode">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
+        <TrashIcon :size="16" />
         Delete Node
       </button>
     </div>

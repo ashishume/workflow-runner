@@ -10,6 +10,7 @@ import StartNode from './nodes/StartNode.vue'
 import TransformNode from './nodes/TransformNode.vue'
 import ConditionNode from './nodes/ConditionNode.vue'
 import EndNode from './nodes/EndNode.vue'
+import { ArrowDownIcon, PlusRectIcon, AlertCircleIcon } from '../assets/icons'
 
 const store = useWorkflowStore()
 
@@ -213,10 +214,7 @@ const nodeColor = (node: { type?: string }) => {
       <!-- Drop zone overlay -->
       <div v-if="isDragOver" class="drop-overlay">
         <div class="drop-indicator">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
+          <ArrowDownIcon :size="40" />
           <span>Drop node here</span>
         </div>
       </div>
@@ -225,11 +223,7 @@ const nodeColor = (node: { type?: string }) => {
     <!-- Empty state -->
     <div v-if="nodes.length === 0" class="empty-state">
       <div class="empty-content">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="12" y1="8" x2="12" y2="16"></line>
-          <line x1="8" y1="12" x2="16" y2="12"></line>
-        </svg>
+        <PlusRectIcon :size="48" :stroke-width="1.5" />
         <h3>Start Building Your Workflow</h3>
         <p>Drag nodes from the palette on the left to begin</p>
       </div>
@@ -238,11 +232,7 @@ const nodeColor = (node: { type?: string }) => {
     <!-- Connection error toast -->
     <Transition name="toast">
       <div v-if="connectionError" class="connection-error-toast">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+        <AlertCircleIcon :size="16" />
         <span>{{ connectionError }}</span>
       </div>
     </Transition>

@@ -2,6 +2,22 @@
 import { ref, computed } from 'vue'
 import { useWorkflowStore } from '../stores/workflow'
 import type { WorkflowState } from '../types/workflow'
+import {
+  WorkflowIcon,
+  SaveIcon,
+  UndoIcon,
+  RedoIcon,
+  PlayIcon,
+  SpinnerIcon,
+  ExportIcon,
+  ImportIcon,
+  TrashIcon,
+  SunIcon,
+  MoonIcon,
+  CloseIcon,
+  CopyIcon,
+  DownloadIcon
+} from '../assets/icons'
 
 const store = useWorkflowStore()
 
@@ -163,20 +179,11 @@ if (typeof window !== 'undefined') {
   <div class="toolbar">
     <div class="toolbar-left">
       <div class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 3v12"></path>
-          <circle cx="18" cy="6" r="3"></circle>
-          <circle cx="6" cy="18" r="3"></circle>
-          <path d="M18 9a9 9 0 0 1-9 9"></path>
-        </svg>
+        <WorkflowIcon :size="24" />
         <span>Workflow Builder</span>
       </div>
       <div v-if="lastSavedText" class="autosave-indicator">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
-        </svg>
+        <SaveIcon :size="14" />
         <span>{{ lastSavedText }}</span>
       </div>
     </div>
@@ -189,10 +196,7 @@ if (typeof window !== 'undefined') {
           :disabled="!canUndo"
           title="Undo (Ctrl+Z)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 7v6h6"></path>
-            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
-          </svg>
+          <UndoIcon :size="18" />
         </button>
         <button 
           class="toolbar-btn" 
@@ -200,10 +204,7 @@ if (typeof window !== 'undefined') {
           :disabled="!canRedo"
           title="Redo (Ctrl+Y)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 7v6h-6"></path>
-            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
-          </svg>
+          <RedoIcon :size="18" />
         </button>
       </div>
       
@@ -215,19 +216,8 @@ if (typeof window !== 'undefined') {
         :disabled="isExecuting || !hasNodes"
         title="Run Workflow"
       >
-        <svg v-if="!isExecuting" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        <svg v-else class="spinner" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="2" x2="12" y2="6"></line>
-          <line x1="12" y1="18" x2="12" y2="22"></line>
-          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-          <line x1="2" y1="12" x2="6" y2="12"></line>
-          <line x1="18" y1="12" x2="22" y2="12"></line>
-          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-          <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-        </svg>
+        <PlayIcon v-if="!isExecuting" :size="18" />
+        <SpinnerIcon v-else :size="18" />
         <span>{{ isExecuting ? 'Running...' : 'Run' }}</span>
       </button>
       
@@ -240,11 +230,7 @@ if (typeof window !== 'undefined') {
           :disabled="!hasNodes"
           title="Export Workflow (Ctrl+E)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
+          <ExportIcon :size="18" />
           <span>Export</span>
         </button>
         <button 
@@ -252,11 +238,7 @@ if (typeof window !== 'undefined') {
           @click="openImportModal"
           title="Import Workflow (Ctrl+I)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
+          <ImportIcon :size="18" />
           <span>Import</span>
         </button>
       </div>
@@ -269,10 +251,7 @@ if (typeof window !== 'undefined') {
         :disabled="!hasNodes"
         title="Clear Workflow"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
+        <TrashIcon :size="18" />
         <span>Clear</span>
       </button>
     </div>
@@ -283,20 +262,8 @@ if (typeof window !== 'undefined') {
         @click="toggleDarkMode"
         :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
       >
-        <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+        <SunIcon v-if="isDarkMode" :size="18" />
+        <MoonIcon v-else :size="18" />
       </button>
     </div>
   </div>
@@ -308,10 +275,7 @@ if (typeof window !== 'undefined') {
         <div class="modal-header">
           <h2>Export Workflow</h2>
           <button class="close-btn" @click="closeExportModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <CloseIcon :size="20" />
           </button>
         </div>
         <div class="modal-body">
@@ -323,18 +287,11 @@ if (typeof window !== 'undefined') {
         </div>
         <div class="modal-footer">
           <button class="btn secondary" @click="copyToClipboard">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
+            <CopyIcon :size="16" />
             Copy
           </button>
           <button class="btn primary" @click="downloadJson">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
+            <DownloadIcon :size="16" />
             Download JSON
           </button>
         </div>
@@ -349,10 +306,7 @@ if (typeof window !== 'undefined') {
         <div class="modal-header">
           <h2>Import Workflow</h2>
           <button class="close-btn" @click="closeImportModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <CloseIcon :size="20" />
           </button>
         </div>
         <div class="modal-body">
@@ -364,11 +318,7 @@ if (typeof window !== 'undefined') {
               id="file-upload"
             />
             <label for="file-upload" class="file-upload-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
+              <ExportIcon :size="24" />
               <span>Upload JSON file</span>
             </label>
           </div>
@@ -518,15 +468,6 @@ if (typeof window !== 'undefined') {
   height: 24px;
   background: var(--border-color);
   margin: 0 4px;
-}
-
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 /* Modal Styles */
