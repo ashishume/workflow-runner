@@ -2,11 +2,6 @@
 
 A modern, visual flow-based workflow builder inspired by n8n and Node-RED. Built with Vue 3, TypeScript, Vue Flow, and Pinia.
 
-![Workflow Builder](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat-square&logo=vue.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)
-![Pinia](https://img.shields.io/badge/Pinia-3.x-yellow?style=flat-square)
-![Vue Flow](https://img.shields.io/badge/Vue%20Flow-1.x-00d4ff?style=flat-square)
-
 ## 🎯 Features
 
 ### Core Features
@@ -17,7 +12,7 @@ A modern, visual flow-based workflow builder inspired by n8n and Node-RED. Built
   - If-Else Condition Node: Conditional branching with multiple operators
   - End Node: Terminate workflow execution
 
-- **Interactive Canvas**: 
+- **Interactive Canvas**:
   - Drag nodes from palette to canvas
   - Move nodes around freely
   - Connect nodes using visual edges
@@ -29,7 +24,7 @@ A modern, visual flow-based workflow builder inspired by n8n and Node-RED. Built
   - Real-time updates with reactive state
   - JSON payload editor for Start nodes
   - Transform operation selector
-  - Condition builder with operators
+  - Condition builder with comprehensive operators
 
 - **State Management**:
   - Centralized state with Pinia
@@ -41,29 +36,35 @@ A modern, visual flow-based workflow builder inspired by n8n and Node-RED. Built
   - Visual simulation of data flow
   - Step-by-step execution with logs
   - Input/output tracking for each node
-  - Cycle detection to prevent infinite loops
+  - **Cycle detection** to prevent infinite loops
+  - Validation with errors and warnings before execution
 
 - **Save/Load Workflows**:
   - Export workflow as JSON
   - Import from JSON file or paste
   - Download workflow configuration
   - Copy to clipboard
+  - Comprehensive import validation
 
 ### Bonus Features ✨
 
-- **Undo/Redo Support**: Full history with Ctrl+Z / Ctrl+Y
+- **Undo/Redo Support**: Full history with Ctrl+Z / Ctrl+Y (up to 50 states)
 - **Dark/Light Mode**: Toggle with persistent preference
 - **Minimap View**: Navigate large workflows easily
-- **LocalStorage Autosave**: Never lose your work
+- **LocalStorage Autosave**: Debounced auto-save (500ms) - never lose your work
 - **Grid Snapping**: Align nodes perfectly
 - **Custom Node Designs**: Unique visual styling per node type
 - **Keyboard Shortcuts**: Efficient workflow management
+- **Toast Notifications**: Success, error, warning, and info messages
+- **Confirmation Modals**: Safe destructive actions with confirmation dialogs
+- **Sample Workflows**: Pre-built examples to get started quickly
+- **Custom SVG Icons**: 25+ handcrafted icons for a polished UI
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -94,36 +95,27 @@ npm run build
 npm run preview
 ```
 
-## 📁 Project Structure
+### Testing
 
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
 ```
-workflow-builder/
-├── public/
-│   └── workflow-icon.svg    # App icon
-├── src/
-│   ├── components/
-│   │   ├── nodes/
-│   │   │   ├── StartNode.vue      # Start node component
-│   │   │   ├── TransformNode.vue  # Transform node component
-│   │   │   ├── ConditionNode.vue  # If-Else node component
-│   │   │   └── EndNode.vue        # End node component
-│   │   ├── NodePalette.vue        # Draggable node palette
-│   │   ├── WorkflowCanvas.vue     # Main canvas with Vue Flow
-│   │   ├── ConfigPanel.vue        # Node configuration panel
-│   │   ├── ExecutionLogs.vue      # Execution logs display
-│   │   └── Toolbar.vue            # Top toolbar with actions
-│   ├── stores/
-│   │   └── workflow.ts            # Pinia store for state management
-│   ├── types/
-│   │   └── workflow.ts            # TypeScript type definitions
-│   ├── App.vue                    # Root component
-│   ├── main.ts                    # Entry point
-│   └── style.css                  # Global styles
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+
+### Code Formatting
+
+```bash
+# Format code with Prettier
+npm run format
+
+# Check formatting
+npm run format:check
 ```
 
 ## 🎮 Usage Guide
@@ -142,102 +134,31 @@ workflow-builder/
 3. Watch the execution logs panel for results
 4. View input/output data for each step
 
-### Workflow Examples
+### Loading Sample Workflows
 
-#### Example 1: Simple Text Transformation
+The app includes pre-built sample workflows in `public/sample-workflows/`:
 
-```
-Start Node (payload: {"message": "hello"})
-    ↓
-Transform Node (uppercase on "message")
-    ↓
-End Node
-```
-
-**Expected Output:**
-```
-Start Node -> { message: "hello" }
-Transform Node -> { message: "HELLO" }
-End Node -> { message: "HELLO" }
-```
-
-#### Example 2: Conditional Flow
-
-```
-Start Node (payload: {"value": 50})
-    ↓
-If-Else Node (value > 25)
-   ├── True → Transform (multiply by 2) → End
-   └── False → End
-```
+- **text-transformation.json**: Simple text processing pipeline
+- **conditional-branching.json**: Grade-based conditional flow with pass/fail paths
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl + Z` | Undo |
-| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo |
-| `Ctrl + E` | Export Workflow |
-| `Ctrl + I` | Import Workflow |
+| Shortcut                        | Action                 |
+| ------------------------------- | ---------------------- |
+| `Ctrl + Z`                      | Undo                   |
+| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo                   |
+| `Ctrl + E`                      | Export Workflow        |
+| `Ctrl + I`                      | Import Workflow        |
+| `Delete` / `Backspace`          | Delete Selected Node   |
+| `Escape`                        | Deselect / Close Modal |
 
 ## 🛠 Technologies Used
 
-- **Vue 3** - Progressive JavaScript framework
-- **TypeScript** - Type-safe JavaScript
-- **Vue Flow** - Interactive node-based graph library
-- **Pinia** - Intuitive state management
-- **Vite** - Next-generation build tool
-- **VueUse** - Collection of Vue composition utilities
-
-## 📝 API Reference
-
-### Node Types
-
-#### Start Node
-```typescript
-interface StartNodeConfig {
-  payload: Record<string, unknown>
-}
-```
-
-#### Transform Node
-```typescript
-interface TransformNodeConfig {
-  operation: 'uppercase' | 'lowercase' | 'append' | 'prepend' | 'multiply' | 'add' | 'replace'
-  field: string
-  value?: string | number
-}
-```
-
-#### Condition Node
-```typescript
-interface ConditionNodeConfig {
-  field: string
-  operator: 'equals' | 'notEquals' | 'contains' | 'greaterThan' | 'lessThan' | 'isEmpty' | 'isNotEmpty'
-  value: string | number | boolean
-}
-```
-
-#### End Node
-```typescript
-interface EndNodeConfig {
-  label: string
-}
-```
-
-### Workflow State
-
-```typescript
-interface WorkflowState {
-  nodes: WorkflowNode[]
-  edges: WorkflowEdge[]
-  viewport?: {
-    x: number
-    y: number
-    zoom: number
-  }
-}
-```
+- **Vue 3.5** - Progressive JavaScript framework
+- **Vue Flow 1.48** - Interactive node-based graph library
+- **Pinia 3.x** - Intuitive state management
+- **Vitest 4.x** - Fast unit testing framework
+- **Sass** - CSS preprocessor for styling
 
 ## 🎨 Design Decisions
 
@@ -246,67 +167,5 @@ interface WorkflowState {
 3. **Gradient Backgrounds**: Modern aesthetic with subtle gradients
 4. **JetBrains Mono Font**: Monospace font for code/data display
 5. **Outfit Font**: Clean, modern sans-serif for UI elements
-
-## 🔧 Configuration
-
-### Vite Config
-The project uses Vite with Vue plugin. Customize in `vite.config.ts`.
-
-### TypeScript Config
-Strict TypeScript configuration for type safety. See `tsconfig.json`.
-
-## 📦 Deployment
-
-### Vercel (Recommended)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-```
-
-### Netlify
-
-```bash
-# Build the project
-npm run build
-
-# Deploy dist folder to Netlify
-```
-
-### Docker
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-EXPOSE 4173
-CMD ["npm", "run", "preview", "--", "--host"]
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- [Vue Flow](https://vueflow.dev/) - For the amazing graph library
-- [n8n](https://n8n.io/) - For inspiration
-- [Node-RED](https://nodered.org/) - For workflow concepts
-
----
-
-Built with ❤️ using Vue 3 + TypeScript
+6. **Toast Notifications**: Non-intrusive feedback for user actions
+7. **Composable Architecture**: Reusable logic separated into composables for maintainability
