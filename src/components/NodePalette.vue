@@ -1,71 +1,66 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { NodeType } from "../types/workflow";
-import {
-  PlayIcon,
-  TransformIcon,
-  BranchIcon,
-  StopIcon,
-  DragIcon,
-} from "../assets/icons";
+  import { ref } from 'vue'
 
-const emit = defineEmits<{
-  dragStart: [type: NodeType, event: DragEvent];
-}>();
+  import { BranchIcon, DragIcon, PlayIcon, StopIcon, TransformIcon } from '../assets/icons'
+  import { NodeType } from '../types/workflow'
 
-interface NodeItem {
-  type: NodeType;
-  label: string;
-  description: string;
-  icon: string;
-  color: string;
-}
+  const emit = defineEmits<{
+    dragStart: [type: NodeType, event: DragEvent]
+  }>()
 
-const nodes: NodeItem[] = [
-  {
-    type: NodeType.START,
-    label: "Start",
-    description: "Begin workflow with payload",
-    icon: "play",
-    color: "#4ade80",
-  },
-  {
-    type: NodeType.TRANSFORM,
-    label: "Transform",
-    description: "Modify data fields",
-    icon: "transform",
-    color: "#a78bfa",
-  },
-  {
-    type: NodeType.CONDITION,
-    label: "If-Else",
-    description: "Conditional branching",
-    icon: "branch",
-    color: "#fbbf24",
-  },
-  {
-    type: NodeType.END,
-    label: "End",
-    description: "Terminate workflow",
-    icon: "stop",
-    color: "#f87171",
-  },
-];
-
-const draggedNode = ref<NodeType | null>(null);
-
-const onDragStart = (event: DragEvent, node: NodeItem) => {
-  if (event.dataTransfer) {
-    event.dataTransfer.setData("application/workflow-node", node.type);
-    event.dataTransfer.effectAllowed = "move";
+  interface NodeItem {
+    type: NodeType
+    label: string
+    description: string
+    icon: string
+    color: string
   }
-  draggedNode.value = node.type;
-  emit("dragStart", node.type, event);
-};
 
-const onDragEnd = () => {
-  draggedNode.value = null;
-};
+  const nodes: NodeItem[] = [
+    {
+      type: NodeType.START,
+      label: 'Start',
+      description: 'Begin workflow with payload',
+      icon: 'play',
+      color: '#4ade80',
+    },
+    {
+      type: NodeType.TRANSFORM,
+      label: 'Transform',
+      description: 'Modify data fields',
+      icon: 'transform',
+      color: '#a78bfa',
+    },
+    {
+      type: NodeType.CONDITION,
+      label: 'If-Else',
+      description: 'Conditional branching',
+      icon: 'branch',
+      color: '#fbbf24',
+    },
+    {
+      type: NodeType.END,
+      label: 'End',
+      description: 'Terminate workflow',
+      icon: 'stop',
+      color: '#f87171',
+    },
+  ]
+
+  const draggedNode = ref<NodeType | null>(null)
+
+  const onDragStart = (event: DragEvent, node: NodeItem) => {
+    if (event.dataTransfer) {
+      event.dataTransfer.setData('application/workflow-node', node.type)
+      event.dataTransfer.effectAllowed = 'move'
+    }
+    draggedNode.value = node.type
+    emit('dragStart', node.type, event)
+  }
+
+  const onDragEnd = () => {
+    draggedNode.value = null
+  }
 </script>
 
 <template>
@@ -107,112 +102,112 @@ const onDragEnd = () => {
 </template>
 
 <style scoped lang="scss">
-.node-palette {
-  width: 280px;
-  background: var(--panel-bg);
-  border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.palette-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border-color);
-
-  h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.3px;
+  .node-palette {
+    width: 280px;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-}
 
-.palette-hint {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--text-tertiary);
-}
+  .palette-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
 
-.nodes-list {
-  flex: 1;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-}
-
-.node-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  cursor: grab;
-  transition: all 0.2s ease;
-  position: relative;
-
-  &:hover {
-    border-color: var(--node-color);
-    background: var(--card-hover-bg);
-    transform: translateX(4px);
-
-    .drag-indicator {
-      opacity: 1;
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
     }
   }
 
-  &:active {
-    cursor: grabbing;
+  .palette-hint {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--text-tertiary);
   }
 
-  &.dragging {
-    opacity: 0.5;
-    transform: scale(0.95);
+  .nodes-list {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
   }
-}
 
-.node-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: color-mix(in srgb, var(--node-color) 15%, transparent);
-  border-radius: 8px;
-  color: var(--node-color);
-  flex-shrink: 0;
-}
+  .node-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    position: relative;
 
-.node-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+    &:hover {
+      border-color: var(--node-color);
+      background: var(--card-hover-bg);
+      transform: translateX(4px);
 
-.node-label {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-primary);
-}
+      .drag-indicator {
+        opacity: 1;
+      }
+    }
 
-.node-description {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    &:active {
+      cursor: grabbing;
+    }
 
-.drag-indicator {
-  color: var(--text-tertiary);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
+    &.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+  }
+
+  .node-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: color-mix(in srgb, var(--node-color) 15%, transparent);
+    border-radius: 8px;
+    color: var(--node-color);
+    flex-shrink: 0;
+  }
+
+  .node-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .node-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .node-description {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .drag-indicator {
+    color: var(--text-tertiary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
 </style>

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-defineProps<{
-  size?: number
-}>()
+  defineProps<{
+    size?: number
+  }>()
 </script>
 
 <template>
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    :width="size ?? 16" 
-    :height="size ?? 16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    stroke-width="2" 
-    stroke-linecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    :width="size ?? 16"
+    :height="size ?? 16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
     stroke-linejoin="round"
   >
     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>

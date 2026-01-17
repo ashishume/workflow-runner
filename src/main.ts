@@ -1,14 +1,17 @@
-import { createApp } from "vue";
-import { createPinia } from "pinia";
-import "@vue-flow/core/dist/style.css";
-import "@vue-flow/core/dist/theme-default.css";
-import "@vue-flow/controls/dist/style.css";
-import "@vue-flow/minimap/dist/style.css";
-import "./style.scss";
-import App from "./App.vue";
+import { createApp } from 'vue'
 
-const app = createApp(App);
-const pinia = createPinia();
+import '@vue-flow/controls/dist/style.css'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/core/dist/theme-default.css'
+import '@vue-flow/minimap/dist/style.css'
 
-app.use(pinia);
-app.mount("#app");
+import { createPinia } from 'pinia'
+
+import App from './App.vue'
+import './style.scss'
+
+const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
+app.mount('#app')
