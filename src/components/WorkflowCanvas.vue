@@ -6,7 +6,8 @@
   import { MarkerType, VueFlow, useVueFlow } from '@vue-flow/core'
   import { MiniMap } from '@vue-flow/minimap'
 
-  import { AlertCircleIcon, ArrowDownIcon, PlusRectIcon } from '../assets/icons'
+  import { ArrowDownIcon, PlusRectIcon } from '../assets/icons'
+  import { useToast } from '../composables/useToast'
   import { useWorkflowStore } from '../stores/workflow'
   import type { NodeType } from '../types/workflow'
   import { getNodeColor } from '../utils/nodeConfig'
@@ -16,15 +17,7 @@
   import TransformNode from './nodes/TransformNode.vue'
 
   const store = useWorkflowStore()
-
-  // Toast notification for connection errors
-  const connectionError = ref<string | null>(null)
-  const showConnectionError = (message: string) => {
-    connectionError.value = message
-    setTimeout(() => {
-      connectionError.value = null
-    }, 3000)
-  }
+  const toast = useToast()
 
   const { onConnect, onNodesChange, onEdgesChange, onNodeDragStop } = useVueFlow()
 
@@ -73,7 +66,7 @@
       params.targetHandle || undefined
     )
     if (!result.success && result.error) {
-      showConnectionError(result.error)
+      toast.error(result.error)
     }
   })
 
@@ -223,14 +216,6 @@
         <p>Drag nodes from the palette on the left to begin</p>
       </div>
     </div>
-
-    <!-- Connection error toast -->
-    <Transition name="toast">
-      <div v-if="connectionError" class="connection-error-toast" @click="connectionError = null">
-        <AlertCircleIcon :size="16" />
-        <span>{{ connectionError }}</span>
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -316,42 +301,6 @@
       margin: 8px 0 0;
       font-size: 14px;
     }
-  }
-
-  // Connection error toast
-  .connection-error-toast {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: rgba(248, 113, 113, 0.95);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    cursor: pointer;
-
-    &:hover {
-      background: rgba(248, 113, 113, 1);
-    }
-  }
-
-  // Toast transitions
-  .toast-enter-active,
-  .toast-leave-active {
-    transition: all 0.3s ease;
-  }
-
-  .toast-enter-from,
-  .toast-leave-to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
   }
 </style>
 

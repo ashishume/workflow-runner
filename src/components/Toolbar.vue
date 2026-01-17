@@ -52,8 +52,26 @@
     return 'Saved'
   })
 
-  // Run workflow
+  // Run workflow with validation
   const runWorkflow = () => {
+    // Validate workflow before execution
+    const validation = store.getWorkflowValidation()
+
+    // Show errors as toast notifications
+    if (validation.errors.length > 0) {
+      validation.errors.forEach((error) => {
+        toast.error(error, 5000)
+      })
+      return // Don't execute if there are errors
+    }
+
+    // Show warnings as toast notifications (but still execute)
+    if (validation.warnings.length > 0) {
+      validation.warnings.forEach((warning) => {
+        toast.warning(warning, 4000)
+      })
+    }
+
     store.executeWorkflow()
   }
 
