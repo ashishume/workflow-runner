@@ -285,6 +285,7 @@
     flex-shrink: 0;
     border: 2px solid var(--panel-bg);
     box-shadow: 0 0 0 2px var(--border-color);
+    margin-top: 6px;
   }
 
   .timeline-line {
