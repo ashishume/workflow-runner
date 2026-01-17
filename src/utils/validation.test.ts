@@ -425,7 +425,7 @@ describe('wouldCreateCycle', () => {
 describe('isValidConnectionWithCycleCheck', () => {
   it('should reject connection that would create a cycle', () => {
     const node1 = createNode('node1', NodeType.TRANSFORM, 'Transform A')
-    const node2 = createNode('node2', NodeType.TRANSFORM, 'Transform B')
+    // const node2 = createNode('node2', NodeType.TRANSFORM, 'Transform B')
     const node3 = createNode('node3', NodeType.TRANSFORM, 'Transform C')
     const edges: WorkflowEdge[] = [
       { id: 'edge1', source: 'node1', target: 'node2' },
@@ -440,7 +440,7 @@ describe('isValidConnectionWithCycleCheck', () => {
   })
 
   it('should allow valid connection without cycle', () => {
-    const node1 = createNode('node1', NodeType.START)
+    // const node1 = createNode('node1', NodeType.START)
     const node2 = createNode('node2', NodeType.TRANSFORM)
     const node3 = createNode('node3', NodeType.END)
     const edges: WorkflowEdge[] = [{ id: 'edge1', source: 'node1', target: 'node2' }]
