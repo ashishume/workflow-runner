@@ -7,6 +7,11 @@ export interface ValidationResult {
   warnings: string[]
 }
 
+export interface CycleDetectionResult {
+  hasCycle: boolean
+  cyclePath: string[] // Node IDs forming the cycle
+}
+
 /**
  * Validates if a connection between two nodes is allowed
  */
@@ -49,6 +54,148 @@ export function isValidConnection(
 }
 
 /**
+ * Checks if adding a new edge would create a cycle using DFS
+ * This is used when validating a new connection before it's added
+ */
+export function wouldCreateCycle(
+  sourceId: string,
+  targetId: string,
+  existingEdges: WorkflowEdge[]
+): boolean {
+  // If adding edge from source to target would create a cycle,
+  // it means there's already a path from target to source
+  // We check if we can reach source from target using existing edges
+
+  // Build adjacency list from existing edges
+  const adjacencyList = new Map<string, string[]>()
+  existingEdges.forEach((edge) => {
+    const targets = adjacencyList.get(edge.source) || []
+    targets.push(edge.target)
+    adjacencyList.set(edge.source, targets)
+  })
+
+  // DFS from target to see if we can reach source
+  const visited = new Set<string>()
+  const stack = [targetId]
+
+  while (stack.length > 0) {
+    const current = stack.pop()!
+
+    if (current === sourceId) {
+      return true // Found a path from target to source, adding edge would create cycle
+    }
+
+    if (visited.has(current)) {
+      continue
+    }
+
+    visited.add(current)
+    const neighbors = adjacencyList.get(current) || []
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        stack.push(neighbor)
+      }
+    }
+  }
+
+  return false
+}
+
+/**
+ * Extended validation that also checks for cycles
+ * Use this when you have access to all nodes
+ */
+export function isValidConnectionWithCycleCheck(
+  sourceNode: WorkflowNode,
+  targetNode: WorkflowNode,
+  existingEdges: WorkflowEdge[]
+): { valid: boolean; reason?: string } {
+  // First do basic validation
+  const basicResult = isValidConnection(sourceNode, targetNode, existingEdges)
+  if (!basicResult.valid) {
+    return basicResult
+  }
+
+  // Check if adding this edge would create a cycle
+  if (wouldCreateCycle(sourceNode.id, targetNode.id, existingEdges)) {
+    return {
+      valid: false,
+      reason: 'This connection would create an infinite loop',
+    }
+  }
+
+  return { valid: true }
+}
+
+/**
+ * Detects cycles (infinite loops) in the workflow graph using DFS
+ * Returns the cycle path if found for better error messaging
+ */
+export function detectCycles(nodes: WorkflowNode[], edges: WorkflowEdge[]): CycleDetectionResult {
+  // Build adjacency list
+  const adjacencyList = new Map<string, string[]>()
+  nodes.forEach((node) => adjacencyList.set(node.id, []))
+  edges.forEach((edge) => {
+    const targets = adjacencyList.get(edge.source) || []
+    targets.push(edge.target)
+    adjacencyList.set(edge.source, targets)
+  })
+
+  // Track visited nodes and nodes in current recursion stack
+  const visited = new Set<string>()
+  const recursionStack = new Set<string>()
+  const parent = new Map<string, string>() // To reconstruct cycle path
+
+  // DFS helper function
+  const dfs = (nodeId: string): string | null => {
+    visited.add(nodeId)
+    recursionStack.add(nodeId)
+
+    const neighbors = adjacencyList.get(nodeId) || []
+    for (const neighbor of neighbors) {
+      // If neighbor is in recursion stack, we found a cycle
+      if (recursionStack.has(neighbor)) {
+        parent.set(neighbor, nodeId)
+        return neighbor // Return the start of the cycle
+      }
+
+      // If not visited, continue DFS
+      if (!visited.has(neighbor)) {
+        parent.set(neighbor, nodeId)
+        const cycleStart = dfs(neighbor)
+        if (cycleStart !== null) {
+          return cycleStart
+        }
+      }
+    }
+
+    recursionStack.delete(nodeId)
+    return null
+  }
+
+  // Check all nodes (handles disconnected components)
+  for (const node of nodes) {
+    if (!visited.has(node.id)) {
+      const cycleStart = dfs(node.id)
+      if (cycleStart !== null) {
+        // Reconstruct the cycle path
+        const cyclePath: string[] = [cycleStart]
+        let current = parent.get(cycleStart)
+        while (current && current !== cycleStart) {
+          cyclePath.unshift(current)
+          current = parent.get(current)
+        }
+        cyclePath.unshift(cycleStart) // Complete the cycle
+
+        return { hasCycle: true, cyclePath }
+      }
+    }
+  }
+
+  return { hasCycle: false, cyclePath: [] }
+}
+
+/**
  * Validates the entire workflow before execution
  */
 export function validateWorkflow(nodes: WorkflowNode[], edges: WorkflowEdge[]): ValidationResult {
@@ -71,6 +218,17 @@ export function validateWorkflow(nodes: WorkflowNode[], edges: WorkflowEdge[]): 
   const endNodes = nodes.filter((n) => n.data.nodeType === NodeType.END)
   if (endNodes.length === 0) {
     warnings.push('Workflow has no End node. Execution will stop after the last connected node.')
+  }
+
+  // Check for infinite loops (cycles)
+  const cycleResult = detectCycles(nodes, edges)
+  if (cycleResult.hasCycle) {
+    // Get node labels for better error message
+    const cycleLabels = cycleResult.cyclePath.map((nodeId) => {
+      const node = nodes.find((n) => n.id === nodeId)
+      return node?.data.label || nodeId
+    })
+    errors.push(`Infinite loop detected: ${cycleLabels.join(' → ')}`)
   }
 
   // Check for disconnected nodes

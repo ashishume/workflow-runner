@@ -9,6 +9,7 @@
   import { AlertCircleIcon, ArrowDownIcon, PlusRectIcon } from '../assets/icons'
   import { useWorkflowStore } from '../stores/workflow'
   import type { NodeType } from '../types/workflow'
+  import { getNodeColor } from '../utils/nodeConfig'
   import ConditionNode from './nodes/ConditionNode.vue'
   import EndNode from './nodes/EndNode.vue'
   import StartNode from './nodes/StartNode.vue'
@@ -165,20 +166,9 @@
     store.selectNode(node.id)
   }
 
-  // MiniMap node color
+  // MiniMap node color - using centralized config
   const nodeColor = (node: { type?: string }) => {
-    switch (node.type) {
-      case 'start':
-        return '#4ade80'
-      case 'transform':
-        return '#a78bfa'
-      case 'condition':
-        return '#fbbf24'
-      case 'end':
-        return '#f87171'
-      default:
-        return '#94a3b8'
-    }
+    return getNodeColor(node.type ?? '')
   }
 </script>
 
@@ -236,7 +226,7 @@
 
     <!-- Connection error toast -->
     <Transition name="toast">
-      <div v-if="connectionError" class="connection-error-toast">
+      <div v-if="connectionError" class="connection-error-toast" @click="connectionError = null">
         <AlertCircleIcon :size="16" />
         <span>{{ connectionError }}</span>
       </div>
@@ -345,6 +335,11 @@
     font-weight: 500;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 1000;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(248, 113, 113, 1);
+    }
   }
 
   // Toast transitions

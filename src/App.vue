@@ -1,9 +1,10 @@
 <script setup lang="ts">
-  import { computed, onMounted, watch } from 'vue'
+  import { computed, onMounted } from 'vue'
 
   import ConfigPanel from './components/ConfigPanel.vue'
   import ExecutionLogs from './components/ExecutionLogs.vue'
   import NodePalette from './components/NodePalette.vue'
+  import ToastContainer from './components/ToastContainer.vue'
   import Toolbar from './components/Toolbar.vue'
   import WorkflowCanvas from './components/WorkflowCanvas.vue'
   import { useWorkflowStore } from './stores/workflow'
@@ -12,15 +13,6 @@
 
   const isDarkMode = computed(() => store.isDarkMode)
   const hasSelectedNode = computed(() => store.selectedNodeId !== null)
-
-  // Apply dark mode class to body
-  watch(
-    isDarkMode,
-    (dark) => {
-      document.documentElement.classList.toggle('light-mode', !dark)
-    },
-    { immediate: true }
-  )
 
   // Try to load auto-saved workflow on mount
   onMounted(() => {
@@ -40,6 +32,9 @@
       <ConfigPanel v-if="hasSelectedNode" />
     </div>
   </div>
+
+  <!-- Global Toast Container -->
+  <ToastContainer />
 </template>
 
 <style scoped lang="scss">

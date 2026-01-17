@@ -497,7 +497,7 @@ describe('Workflow Execution', () => {
     expect(store.executionLogs.some((log) => log.nodeName === 'False End')).toBe(true)
   })
 
-  it('should detect cycles and prevent infinite loops', async () => {
+  it('should detect cycles and prevent infinite loops at connection time', async () => {
     const store = useWorkflowStore()
     const startId = store.addNode(NodeType.START, { x: 100, y: 100 })
     const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
@@ -508,16 +508,18 @@ describe('Workflow Execution', () => {
     // So we test with transform nodes creating a cycle
     const transform2Id = store.addNode(NodeType.TRANSFORM, { x: 300, y: 100 })
     store.addEdge(transformId, transform2Id)
-    store.addEdge(transform2Id, transformId) // Creates a cycle
 
-    await store.executeWorkflow()
+    // Attempting to create a cycle should be rejected at connection time
+    const result = store.addEdge(transform2Id, transformId)
 
-    // Should have a cycle detection error in the logs
-    expect(
-      store.executionLogs.some(
-        (log) => log.status === 'error' && log.message?.includes('Cycle detected')
-      )
-    ).toBe(true)
+    // The edge creation should fail with an error about infinite loops
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('infinite loop')
+
+    // The edge should not have been added
+    expect(store.edges.some((e) => e.source === transform2Id && e.target === transformId)).toBe(
+      false
+    )
   })
 
   it('should handle equals condition operator', async () => {

@@ -2,60 +2,25 @@
   import { ref } from 'vue'
 
   import { BranchIcon, DragIcon, PlayIcon, StopIcon, TransformIcon } from '../assets/icons'
-  import { NodeType } from '../types/workflow'
+  import type { NodeType } from '../types/workflow'
+  import { NODE_TYPE_CONFIGS } from '../utils/nodeConfig'
 
   const emit = defineEmits<{
     dragStart: [type: NodeType, event: DragEvent]
   }>()
 
-  interface NodeItem {
-    type: NodeType
-    label: string
-    description: string
-    icon: string
-    color: string
-  }
-
-  const nodes: NodeItem[] = [
-    {
-      type: NodeType.START,
-      label: 'Start',
-      description: 'Begin workflow with payload',
-      icon: 'play',
-      color: '#4ade80',
-    },
-    {
-      type: NodeType.TRANSFORM,
-      label: 'Transform',
-      description: 'Modify data fields',
-      icon: 'transform',
-      color: '#a78bfa',
-    },
-    {
-      type: NodeType.CONDITION,
-      label: 'If-Else',
-      description: 'Conditional branching',
-      icon: 'branch',
-      color: '#fbbf24',
-    },
-    {
-      type: NodeType.END,
-      label: 'End',
-      description: 'Terminate workflow',
-      icon: 'stop',
-      color: '#f87171',
-    },
-  ]
+  // Use centralized node configurations
+  const nodes = NODE_TYPE_CONFIGS
 
   const draggedNode = ref<NodeType | null>(null)
 
-  const onDragStart = (event: DragEvent, node: NodeItem) => {
+  const onDragStart = (event: DragEvent, nodeType: NodeType) => {
     if (event.dataTransfer) {
-      event.dataTransfer.setData('application/workflow-node', node.type)
+      event.dataTransfer.setData('application/workflow-node', nodeType)
       event.dataTransfer.effectAllowed = 'move'
     }
-    draggedNode.value = node.type
-    emit('dragStart', node.type, event)
+    draggedNode.value = nodeType
+    emit('dragStart', nodeType, event)
   }
 
   const onDragEnd = () => {
@@ -76,9 +41,9 @@
         :key="node.type"
         class="node-item"
         :class="{ dragging: draggedNode === node.type }"
-        :style="{ '--node-color': node.color }"
+        :style="{ '--node-color': node.colors.primary }"
         draggable="true"
-        @dragstart="onDragStart($event, node)"
+        @dragstart="onDragStart($event, node.type)"
         @dragend="onDragEnd"
       >
         <div class="node-icon">

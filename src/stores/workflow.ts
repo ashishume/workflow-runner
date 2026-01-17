@@ -1,13 +1,15 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 
 import { defineStore } from 'pinia'
 
+import { useTheme } from '../composables/useTheme'
+import { useWorkflowExecution } from '../composables/useWorkflowExecution'
+import { useWorkflowHistory } from '../composables/useWorkflowHistory'
+import { useWorkflowPersistence } from '../composables/useWorkflowPersistence'
 import { ConditionOperator, NodeType, TransformOperation } from '../types/workflow'
 import type {
   ConditionNodeConfig,
   EndNodeConfig,
-  ExecutionLogEntry,
-  HistoryState,
   NodeConfig,
   StartNodeConfig,
   TransformNodeConfig,
@@ -15,7 +17,12 @@ import type {
   WorkflowNode,
   WorkflowState,
 } from '../types/workflow'
-import { isValidConnection, validateImportedWorkflow, validateWorkflow } from '../utils/validation'
+import { getNodeLabel } from '../utils/nodeConfig'
+import {
+  isValidConnectionWithCycleCheck,
+  validateImportedWorkflow,
+  validateWorkflow,
+} from '../utils/validation'
 
 // Default configurations for each node type
 const getDefaultConfig = (type: NodeType): NodeConfig => {
@@ -41,118 +48,31 @@ const getDefaultConfig = (type: NodeType): NodeConfig => {
   }
 }
 
-const getNodeLabel = (type: NodeType): string => {
-  switch (type) {
-    case NodeType.START:
-      return 'Start'
-    case NodeType.TRANSFORM:
-      return 'Transform'
-    case NodeType.CONDITION:
-      return 'If-Else'
-    case NodeType.END:
-      return 'End'
-    default:
-      return 'Node'
-  }
-}
-
 export const useWorkflowStore = defineStore('workflow', () => {
+  // Initialize composables
+  const history = useWorkflowHistory({ maxHistorySize: 50 })
+  const persistence = useWorkflowPersistence({ debounceMs: 500 })
+  const execution = useWorkflowExecution({ executionDelay: 500, maxLogEntries: 100 })
+  const theme = useTheme()
+
   // State
   const nodes = ref<WorkflowNode[]>([])
   const edges = ref<WorkflowEdge[]>([])
   const selectedNodeId = ref<string | null>(null)
-  const executionLogs = ref<ExecutionLogEntry[]>([])
-  const isExecuting = ref(false)
   const viewport = ref({ x: 0, y: 0, zoom: 1 })
-
-  // Undo/Redo history
-  const history = ref<HistoryState[]>([])
-  const historyIndex = ref(-1)
-  const maxHistorySize = 50
-  const isUndoRedoAction = ref(false)
-
-  // Dark mode
-  const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
-
-  // Last saved timestamp for autosave indicator
-  const lastSavedAt = ref<number | null>(null)
 
   // Computed
   const selectedNode = computed(
     () => nodes.value.find((n) => n.id === selectedNodeId.value) || null
   )
 
-  const canUndo = computed(() => historyIndex.value > 0)
-  const canRedo = computed(() => historyIndex.value < history.value.length - 1)
-
-  // Save current state to history
-  const saveToHistory = () => {
-    if (isUndoRedoAction.value) return
-
-    // Remove any future states if we're in the middle of history
-    if (historyIndex.value < history.value.length - 1) {
-      history.value = history.value.slice(0, historyIndex.value + 1)
-    }
-
-    // Add current state
-    const state: HistoryState = {
-      nodes: JSON.parse(JSON.stringify(nodes.value)),
-      edges: JSON.parse(JSON.stringify(edges.value)),
-    }
-
-    history.value.push(state)
-
-    // Limit history size
-    if (history.value.length > maxHistorySize) {
-      history.value.shift()
-    } else {
-      historyIndex.value = history.value.length - 1
-    }
-  }
-
-  // Initialize history with empty state
-  const initHistory = () => {
-    history.value = [
-      {
-        nodes: [],
-        edges: [],
-      },
-    ]
-    historyIndex.value = 0
-  }
-
-  // Undo
-  const undo = () => {
-    if (!canUndo.value) return
-
-    isUndoRedoAction.value = true
-    historyIndex.value--
-    const state = history.value[historyIndex.value]
-    if (state) {
-      nodes.value = JSON.parse(JSON.stringify(state.nodes))
-      edges.value = JSON.parse(JSON.stringify(state.edges))
-    }
-    selectedNodeId.value = null
-    isUndoRedoAction.value = false
-  }
-
-  // Redo
-  const redo = () => {
-    if (!canRedo.value) return
-
-    isUndoRedoAction.value = true
-    historyIndex.value++
-    const state = history.value[historyIndex.value]
-    if (state) {
-      nodes.value = JSON.parse(JSON.stringify(state.nodes))
-      edges.value = JSON.parse(JSON.stringify(state.edges))
-    }
-    selectedNodeId.value = null
-    isUndoRedoAction.value = false
-  }
-
   // Generate unique ID
   const generateId = () => `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+  // Save to history helper
+  const saveToHistory = () => {
+    history.saveToHistory(nodes.value, edges.value)
+  }
 
   // Add node
   const addNode = (type: NodeType, position: { x: number; y: number }) => {
@@ -172,7 +92,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     return id
   }
 
-  // Update node position
+  // Update node position (without saving to history - for drag)
   const updateNodePosition = (nodeId: string, position: { x: number; y: number }) => {
     const node = nodes.value.find((n) => n.id === nodeId)
     if (node) {
@@ -180,7 +100,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     }
   }
 
-  // Update node positions (batch)
+  // Update node positions (batch) - saves to history
   const updateNodePositions = (
     updates: Array<{ id: string; position: { x: number; y: number } }>
   ) => {
@@ -235,8 +155,8 @@ export const useWorkflowStore = defineStore('workflow', () => {
       return { success: false, error: 'Source or target node not found' }
     }
 
-    // Use validation utility
-    const validation = isValidConnection(sourceNode, targetNode, edges.value)
+    // Use validation utility with cycle detection
+    const validation = isValidConnectionWithCycleCheck(sourceNode, targetNode, edges.value)
     if (!validation.valid) {
       return { success: false, error: validation.reason }
     }
@@ -275,15 +195,15 @@ export const useWorkflowStore = defineStore('workflow', () => {
     nodes.value = []
     edges.value = []
     selectedNodeId.value = null
-    executionLogs.value = []
+    execution.clearLogs()
     saveToHistory()
   }
 
   // Export workflow
   const exportWorkflow = (): WorkflowState => {
     return {
-      nodes: JSON.parse(JSON.stringify(nodes.value)),
-      edges: JSON.parse(JSON.stringify(edges.value)),
+      nodes: JSON.parse(JSON.stringify(toRaw(nodes.value))),
+      edges: JSON.parse(JSON.stringify(toRaw(edges.value))),
       viewport: { ...viewport.value },
     }
   }
@@ -302,7 +222,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
       viewport.value = state.viewport
     }
     selectedNodeId.value = null
-    executionLogs.value = []
+    execution.clearLogs()
     saveToHistory()
     return { success: true, errors: [] }
   }
@@ -314,310 +234,49 @@ export const useWorkflowStore = defineStore('workflow', () => {
 
   // Execute workflow
   const executeWorkflow = async () => {
-    executionLogs.value = []
-    isExecuting.value = true
-
-    // Validate workflow first
-    const validation = validateWorkflow(nodes.value, edges.value)
-
-    // Log warnings
-    validation.warnings.forEach((warning) => {
-      executionLogs.value.push({
-        nodeId: 'system',
-        nodeName: 'System',
-        nodeType: NodeType.START,
-        input: {},
-        output: {},
-        timestamp: Date.now(),
-        status: 'skipped',
-        message: `⚠️ Warning: ${warning}`,
-      })
-    })
-
-    // Check for errors
-    if (!validation.valid) {
-      validation.errors.forEach((error) => {
-        executionLogs.value.push({
-          nodeId: 'system',
-          nodeName: 'System',
-          nodeType: NodeType.START,
-          input: {},
-          output: {},
-          timestamp: Date.now(),
-          status: 'error',
-          message: error,
-        })
-      })
-      isExecuting.value = false
-      return
-    }
-
-    // Find start nodes
-    const startNodes = nodes.value.filter((n) => n.data.nodeType === NodeType.START)
-
-    if (startNodes.length === 0) {
-      executionLogs.value.push({
-        nodeId: 'system',
-        nodeName: 'System',
-        nodeType: NodeType.START,
-        input: {},
-        output: {},
-        timestamp: Date.now(),
-        status: 'error',
-        message: 'No start node found in workflow',
-      })
-      isExecuting.value = false
-      return
-    }
-
-    // Build adjacency list for traversal
-    const adjacencyList = new Map<string, string[]>()
-    nodes.value.forEach((n) => adjacencyList.set(n.id, []))
-    edges.value.forEach((e) => {
-      const targets = adjacencyList.get(e.source) || []
-      targets.push(e.target)
-      adjacencyList.set(e.source, targets)
-    })
-
-    // Execute from each start node
-    for (const startNode of startNodes) {
-      await executeFromNode(
-        startNode,
-        adjacencyList,
-        (startNode.data.config as StartNodeConfig).payload
-      )
-    }
-
-    isExecuting.value = false
+    await execution.execute(nodes.value, edges.value)
   }
 
-  // Execute from a specific node
-  const executeFromNode = async (
-    node: WorkflowNode,
-    adjacencyList: Map<string, string[]>,
-    inputData: Record<string, unknown>,
-    visited: Set<string> = new Set()
-  ) => {
-    // Cycle detection
-    if (visited.has(node.id)) {
-      executionLogs.value.push({
-        nodeId: node.id,
-        nodeName: node.data.label,
-        nodeType: node.data.nodeType,
-        input: inputData,
-        output: {},
-        timestamp: Date.now(),
-        status: 'error',
-        message: 'Cycle detected - node already visited',
-      })
-      return
-    }
-
-    visited.add(node.id)
-
-    // Simulate delay for visual effect
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    let outputData: Record<string, unknown> = { ...inputData }
-    let status: 'success' | 'error' | 'skipped' = 'success'
-    let message: string | undefined
-
-    try {
-      switch (node.data.nodeType) {
-        case NodeType.START: {
-          const config = node.data.config as StartNodeConfig
-          outputData = { ...config.payload }
-          message = 'Started workflow execution'
-          break
-        }
-
-        case NodeType.TRANSFORM: {
-          const config = node.data.config as TransformNodeConfig
-          const fieldValue = inputData[config.field]
-
-          switch (config.operation) {
-            case TransformOperation.UPPERCASE:
-              if (typeof fieldValue === 'string') {
-                outputData[config.field] = fieldValue.toUpperCase()
-              }
-              break
-            case TransformOperation.LOWERCASE:
-              if (typeof fieldValue === 'string') {
-                outputData[config.field] = fieldValue.toLowerCase()
-              }
-              break
-            case TransformOperation.APPEND:
-              if (typeof fieldValue === 'string') {
-                outputData[config.field] = fieldValue + (config.value || '')
-              }
-              break
-            case TransformOperation.PREPEND:
-              if (typeof fieldValue === 'string') {
-                outputData[config.field] = (config.value || '') + fieldValue
-              }
-              break
-            case TransformOperation.MULTIPLY:
-              if (typeof fieldValue === 'number') {
-                outputData[config.field] = fieldValue * (Number(config.value) || 1)
-              }
-              break
-            case TransformOperation.ADD:
-              if (typeof fieldValue === 'number') {
-                outputData[config.field] = fieldValue + (Number(config.value) || 0)
-              }
-              break
-            case TransformOperation.REPLACE:
-              outputData[config.field] = config.value
-              break
-          }
-          message = `Applied ${config.operation} to ${config.field}`
-          break
-        }
-
-        case NodeType.CONDITION: {
-          const config = node.data.config as ConditionNodeConfig
-          const fieldValue = inputData[config.field]
-          let conditionMet = false
-
-          switch (config.operator) {
-            case ConditionOperator.EQUALS:
-              conditionMet = fieldValue === config.value
-              break
-            case ConditionOperator.NOT_EQUALS:
-              conditionMet = fieldValue !== config.value
-              break
-            case ConditionOperator.CONTAINS:
-              conditionMet = String(fieldValue).includes(String(config.value))
-              break
-            case ConditionOperator.GREATER_THAN:
-              conditionMet = Number(fieldValue) > Number(config.value)
-              break
-            case ConditionOperator.LESS_THAN:
-              conditionMet = Number(fieldValue) < Number(config.value)
-              break
-            case ConditionOperator.GREATER_THAN_OR_EQUAL:
-              conditionMet = Number(fieldValue) >= Number(config.value)
-              break
-            case ConditionOperator.LESS_THAN_OR_EQUAL:
-              conditionMet = Number(fieldValue) <= Number(config.value)
-              break
-            case ConditionOperator.IS_EMPTY:
-              conditionMet = !fieldValue || fieldValue === ''
-              break
-            case ConditionOperator.IS_NOT_EMPTY:
-              conditionMet = !!fieldValue && fieldValue !== ''
-              break
-            case ConditionOperator.IS_EVEN:
-              conditionMet = typeof fieldValue === 'number' && fieldValue % 2 === 0
-              break
-            case ConditionOperator.IS_ODD:
-              conditionMet = typeof fieldValue === 'number' && fieldValue % 2 !== 0
-              break
-            case ConditionOperator.IS_DIVISIBLE_BY:
-              conditionMet =
-                typeof fieldValue === 'number' &&
-                Number(config.value) !== 0 &&
-                fieldValue % Number(config.value) === 0
-              break
-          }
-
-          outputData = { ...inputData, _conditionMet: conditionMet }
-          message = `Condition ${config.field} ${config.operator} ${
-            config.value || ''
-          }: ${conditionMet}`
-          break
-        }
-
-        case NodeType.END: {
-          message = 'Workflow execution completed'
-          break
-        }
-      }
-    } catch (error) {
-      status = 'error'
-      message = error instanceof Error ? error.message : 'Unknown error'
-    }
-
-    // Log execution
-    executionLogs.value.push({
-      nodeId: node.id,
-      nodeName: node.data.label,
-      nodeType: node.data.nodeType,
-      input: inputData,
-      output: outputData,
-      timestamp: Date.now(),
-      status,
-      message,
-    })
-
-    // Continue to next nodes
-    if (status !== 'error') {
-      const nextNodeIds = adjacencyList.get(node.id) || []
-
-      for (const nextNodeId of nextNodeIds) {
-        const nextNode = nodes.value.find((n) => n.id === nextNodeId)
-        if (nextNode) {
-          // For condition nodes, check which branch to follow
-          if (node.data.nodeType === NodeType.CONDITION) {
-            const edge = edges.value.find((e) => e.source === node.id && e.target === nextNodeId)
-            const conditionMet = outputData._conditionMet as boolean
-
-            // If edge is from 'true' handle and condition is not met, skip
-            if (edge?.sourceHandle === 'true' && !conditionMet) continue
-            // If edge is from 'false' handle and condition is met, skip
-            if (edge?.sourceHandle === 'false' && conditionMet) continue
-          }
-
-          await executeFromNode(nextNode, adjacencyList, outputData, new Set(visited))
-        }
-      }
+  // Undo
+  const undo = () => {
+    const state = history.undo()
+    if (state) {
+      nodes.value = state.nodes
+      edges.value = state.edges
+      selectedNodeId.value = null
     }
   }
 
-  // Clear execution logs
-  const clearExecutionLogs = () => {
-    executionLogs.value = []
-  }
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    isDarkMode.value = !isDarkMode.value
-    localStorage.setItem('darkMode', String(isDarkMode.value))
-  }
-
-  // Auto-save to localStorage
-  const autoSave = () => {
-    const state = exportWorkflow()
-    localStorage.setItem('workflow-autosave', JSON.stringify(state))
-    lastSavedAt.value = Date.now()
+  // Redo
+  const redo = () => {
+    const state = history.redo()
+    if (state) {
+      nodes.value = state.nodes
+      edges.value = state.edges
+      selectedNodeId.value = null
+    }
   }
 
   // Load from auto-save
   const loadAutoSave = () => {
-    const saved = localStorage.getItem('workflow-autosave')
-    if (saved) {
-      try {
-        const state = JSON.parse(saved) as WorkflowState
-        importWorkflow(state)
-        return true
-      } catch {
-        return false
-      }
+    const state = persistence.loadFromStorage()
+    if (state) {
+      const result = importWorkflow(state)
+      return result.success
     }
     return false
   }
 
-  // Watch for changes and auto-save
+  // Watch for changes and auto-save (debounced via composable)
   watch(
     [nodes, edges],
     () => {
-      autoSave()
+      if (!history.isInUndoRedo()) {
+        persistence.autoSave(exportWorkflow())
+      }
     },
     { deep: true }
   )
-
-  // Initialize
-  initHistory()
 
   return {
     // State
@@ -625,15 +284,22 @@ export const useWorkflowStore = defineStore('workflow', () => {
     edges,
     selectedNodeId,
     selectedNode,
-    executionLogs,
-    isExecuting,
     viewport,
-    isDarkMode,
-    lastSavedAt,
+
+    // Execution state (from composable)
+    executionLogs: execution.executionLogs,
+    isExecuting: execution.isExecuting,
+
+    // Theme (from composable)
+    isDarkMode: theme.isDarkMode,
+    toggleDarkMode: theme.toggleDarkMode,
+
+    // Persistence (from composable)
+    lastSavedAt: persistence.lastSavedAt,
 
     // Undo/Redo
-    canUndo,
-    canRedo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
     undo,
     redo,
 
@@ -652,9 +318,11 @@ export const useWorkflowStore = defineStore('workflow', () => {
     exportWorkflow,
     importWorkflow,
     executeWorkflow,
-    clearExecutionLogs,
-    toggleDarkMode,
+    clearExecutionLogs: execution.clearLogs,
     loadAutoSave,
     getWorkflowValidation,
+
+    // Expose persistence methods for toolbar
+    downloadWorkflow: persistence.downloadAsFile,
   }
 })

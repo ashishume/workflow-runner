@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
 
+  import { useEventListener } from '@vueuse/core'
+
   import {
     CloseIcon,
     CopyIcon,
@@ -17,13 +19,17 @@
     UndoIcon,
     WorkflowIcon,
   } from '../assets/icons'
+  import { useToast } from '../composables/useToast'
   import { useWorkflowStore } from '../stores/workflow'
   import type { WorkflowState } from '../types/workflow'
+  import ConfirmModal from './ConfirmModal.vue'
 
   const store = useWorkflowStore()
+  const toast = useToast()
 
   const isExportModalOpen = ref(false)
   const isImportModalOpen = ref(false)
+  const isConfirmClearOpen = ref(false)
   const exportedJson = ref('')
   const importJson = ref('')
   const importError = ref('')
@@ -56,10 +62,18 @@
   const redo = () => store.redo()
 
   // Clear workflow
-  const clearWorkflow = () => {
-    if (confirm('Are you sure you want to clear the workflow?')) {
-      store.clearWorkflow()
-    }
+  const openClearConfirm = () => {
+    isConfirmClearOpen.value = true
+  }
+
+  const confirmClear = () => {
+    store.clearWorkflow()
+    isConfirmClearOpen.value = false
+    toast.success('Workflow cleared')
+  }
+
+  const cancelClear = () => {
+    isConfirmClearOpen.value = false
   }
 
   // Export workflow
@@ -77,22 +91,15 @@
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(exportedJson.value)
-      alert('Copied to clipboard!')
+      toast.success('Copied to clipboard!')
     } catch {
-      alert('Failed to copy. Please select and copy manually.')
+      toast.error('Failed to copy. Please select and copy manually.')
     }
   }
 
   const downloadJson = () => {
-    const blob = new Blob([exportedJson.value], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workflow-${Date.now()}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    store.downloadWorkflow(store.exportWorkflow())
+    toast.success('Workflow downloaded!')
   }
 
   // Import workflow
@@ -136,6 +143,7 @@
       }
 
       closeImportModal()
+      toast.success('Workflow imported successfully!')
     } catch (error) {
       if (error instanceof SyntaxError) {
         importError.value = `Invalid JSON: ${error.message}`
@@ -150,8 +158,14 @@
     store.toggleDarkMode()
   }
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts handler
   const handleKeydown = (event: KeyboardEvent) => {
+    // Don't trigger shortcuts when typing in inputs
+    const target = event.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return
+    }
+
     if (event.metaKey || event.ctrlKey) {
       if (event.key === 'z' && !event.shiftKey) {
         event.preventDefault()
@@ -167,12 +181,30 @@
         openImportModal()
       }
     }
+
+    // Delete selected node
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (store.selectedNodeId) {
+        event.preventDefault()
+        store.removeNode(store.selectedNodeId)
+        toast.info('Node deleted')
+      }
+    }
+
+    // Escape to deselect
+    if (event.key === 'Escape') {
+      if (store.selectedNodeId) {
+        store.selectNode(null)
+      }
+      // Close any open modals
+      if (isExportModalOpen.value) closeExportModal()
+      if (isImportModalOpen.value) closeImportModal()
+      if (isConfirmClearOpen.value) cancelClear()
+    }
   }
 
-  // Register keyboard shortcuts
-  if (typeof window !== 'undefined') {
-    window.addEventListener('keydown', handleKeydown)
-  }
+  // Use vueuse's useEventListener for automatic cleanup
+  useEventListener(window, 'keydown', handleKeydown)
 </script>
 
 <template>
@@ -233,7 +265,7 @@
 
       <button
         class="toolbar-btn danger"
-        @click="clearWorkflow"
+        @click="openClearConfirm"
         :disabled="!hasNodes"
         title="Clear Workflow"
       >
@@ -253,6 +285,17 @@
       </button>
     </div>
   </div>
+
+  <!-- Confirm Clear Modal -->
+  <ConfirmModal
+    v-if="isConfirmClearOpen"
+    title="Clear Workflow"
+    message="Are you sure you want to clear the workflow? This action cannot be undone."
+    confirm-text="Clear"
+    confirm-variant="danger"
+    @confirm="confirmClear"
+    @cancel="cancelClear"
+  />
 
   <!-- Export Modal -->
   <Teleport to="body">
@@ -515,7 +558,7 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     color: var(--text-primary);
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
     font-size: 12px;
     resize: vertical;
 
@@ -574,6 +617,7 @@
     margin-top: 8px;
     font-size: 12px;
     color: #f87171;
+    white-space: pre-wrap;
   }
 
   .modal-footer {

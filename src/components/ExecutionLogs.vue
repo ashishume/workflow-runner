@@ -3,6 +3,7 @@
 
   import { ChevronUpIcon, ClockIcon, TerminalIcon } from '../assets/icons'
   import { useWorkflowStore } from '../stores/workflow'
+  import { getNodeColor } from '../utils/nodeConfig'
 
   const store = useWorkflowStore()
 
@@ -23,19 +24,9 @@
     }
   }
 
-  const getNodeColor = (nodeType: string) => {
-    switch (nodeType) {
-      case 'start':
-        return '#4ade80'
-      case 'transform':
-        return '#a78bfa'
-      case 'condition':
-        return '#fbbf24'
-      case 'end':
-        return '#f87171'
-      default:
-        return '#94a3b8'
-    }
+  // Use centralized node color config
+  const getLogNodeColor = (nodeType: string) => {
+    return getNodeColor(nodeType)
   }
 
   const toggleExpanded = () => {
@@ -80,7 +71,7 @@
           :class="log.status"
         >
           <div class="log-timeline">
-            <div class="timeline-dot" :style="{ background: getNodeColor(log.nodeType) }"></div>
+            <div class="timeline-dot" :style="{ background: getLogNodeColor(log.nodeType) }"></div>
             <div v-if="index < logs.length - 1" class="timeline-line"></div>
           </div>
 
@@ -89,8 +80,8 @@
               <span
                 class="node-badge"
                 :style="{
-                  background: `color-mix(in srgb, ${getNodeColor(log.nodeType)} 20%, transparent)`,
-                  color: getNodeColor(log.nodeType),
+                  background: `color-mix(in srgb, ${getLogNodeColor(log.nodeType)} 20%, transparent)`,
+                  color: getLogNodeColor(log.nodeType),
                 }"
               >
                 {{ log.nodeName }}
@@ -317,7 +308,7 @@
   .log-time {
     font-size: 11px;
     color: var(--text-tertiary);
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
   }
 
   .log-message {
@@ -352,7 +343,7 @@
   .data-value {
     margin: 0;
     font-size: 11px;
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
     color: var(--text-secondary);
     background: var(--input-bg);
     padding: 8px 10px;
