@@ -215,7 +215,7 @@
   }
 
   .logs-content {
-    max-height: 300px;
+    height: 200px;
     overflow-y: auto;
     padding: 0 20px 20px;
   }
@@ -224,7 +224,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 32px;
+    justify-content: center;
+    height: 100%;
     color: var(--text-tertiary);
     text-align: center;
 
