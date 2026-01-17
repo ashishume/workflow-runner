@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
 import { useWorkflowStore } from "./workflow";
+import {
+  NodeType,
+  TransformOperation,
+  ConditionOperator,
+} from "../types/workflow";
 
 // Mock localStorage
 const localStorageMock = {
@@ -20,31 +25,31 @@ describe("Workflow Store", () => {
   describe("Node Management", () => {
     it("should add a start node with default config", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
 
       expect(store.nodes).toHaveLength(1);
       expect(store.nodes[0]!.id).toBe(nodeId);
-      expect(store.nodes[0]!.type).toBe("start");
-      expect(store.nodes[0]!.data.nodeType).toBe("start");
+      expect(store.nodes[0]!.type).toBe(NodeType.START);
+      expect(store.nodes[0]!.data.nodeType).toBe(NodeType.START);
       expect(store.nodes[0]!.data.config).toHaveProperty("payload");
     });
 
     it("should add a transform node with default config", () => {
       const store = useWorkflowStore();
-      store.addNode("transform", { x: 200, y: 100 });
+      store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
 
       expect(store.nodes).toHaveLength(1);
-      expect(store.nodes[0]!.data.nodeType).toBe("transform");
+      expect(store.nodes[0]!.data.nodeType).toBe(NodeType.TRANSFORM);
       expect(store.nodes[0]!.data.config).toHaveProperty("operation");
       expect(store.nodes[0]!.data.config).toHaveProperty("field");
     });
 
     it("should add a condition node with default config", () => {
       const store = useWorkflowStore();
-      store.addNode("condition", { x: 300, y: 100 });
+      store.addNode(NodeType.CONDITION, { x: 300, y: 100 });
 
       expect(store.nodes).toHaveLength(1);
-      expect(store.nodes[0]!.data.nodeType).toBe("condition");
+      expect(store.nodes[0]!.data.nodeType).toBe(NodeType.CONDITION);
       expect(store.nodes[0]!.data.config).toHaveProperty("field");
       expect(store.nodes[0]!.data.config).toHaveProperty("operator");
       expect(store.nodes[0]!.data.config).toHaveProperty("value");
@@ -52,17 +57,17 @@ describe("Workflow Store", () => {
 
     it("should add an end node with default config", () => {
       const store = useWorkflowStore();
-      store.addNode("end", { x: 400, y: 100 });
+      store.addNode(NodeType.END, { x: 400, y: 100 });
 
       expect(store.nodes).toHaveLength(1);
-      expect(store.nodes[0]!.data.nodeType).toBe("end");
+      expect(store.nodes[0]!.data.nodeType).toBe(NodeType.END);
       expect(store.nodes[0]!.data.config).toHaveProperty("label");
     });
 
     it("should remove a node and its connected edges", () => {
       const store = useWorkflowStore();
-      const node1Id = store.addNode("start", { x: 100, y: 100 });
-      const node2Id = store.addNode("end", { x: 300, y: 100 });
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 });
+      const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 });
       store.addEdge(node1Id, node2Id);
 
       expect(store.nodes).toHaveLength(2);
@@ -76,7 +81,7 @@ describe("Workflow Store", () => {
 
     it("should update node position", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
 
       store.updateNodePosition(nodeId, { x: 200, y: 200 });
 
@@ -85,7 +90,7 @@ describe("Workflow Store", () => {
 
     it("should update node config", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
 
       store.updateNodeConfig(nodeId, { payload: { test: "value" } });
 
@@ -96,7 +101,7 @@ describe("Workflow Store", () => {
 
     it("should update node label", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
 
       store.updateNodeLabel(nodeId, "Custom Start");
 
@@ -107,8 +112,8 @@ describe("Workflow Store", () => {
   describe("Edge Management", () => {
     it("should add an edge between nodes", () => {
       const store = useWorkflowStore();
-      const node1Id = store.addNode("start", { x: 100, y: 100 });
-      const node2Id = store.addNode("end", { x: 300, y: 100 });
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 });
+      const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 });
 
       store.addEdge(node1Id, node2Id);
 
@@ -119,8 +124,8 @@ describe("Workflow Store", () => {
 
     it("should prevent duplicate edges", () => {
       const store = useWorkflowStore();
-      const node1Id = store.addNode("start", { x: 100, y: 100 });
-      const node2Id = store.addNode("end", { x: 300, y: 100 });
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 });
+      const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 });
 
       store.addEdge(node1Id, node2Id);
       store.addEdge(node1Id, node2Id); // Duplicate
@@ -130,7 +135,7 @@ describe("Workflow Store", () => {
 
     it("should prevent self-loops", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("transform", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.TRANSFORM, { x: 100, y: 100 });
 
       store.addEdge(nodeId, nodeId);
 
@@ -139,8 +144,8 @@ describe("Workflow Store", () => {
 
     it("should remove an edge", () => {
       const store = useWorkflowStore();
-      const node1Id = store.addNode("start", { x: 100, y: 100 });
-      const node2Id = store.addNode("end", { x: 300, y: 100 });
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 });
+      const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 });
       store.addEdge(node1Id, node2Id);
 
       store.removeEdge(`edge_${node1Id}_${node2Id}`);
@@ -152,7 +157,7 @@ describe("Workflow Store", () => {
   describe("Node Selection", () => {
     it("should select a node", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
 
       store.selectNode(nodeId);
 
@@ -162,7 +167,7 @@ describe("Workflow Store", () => {
 
     it("should deselect when selecting null", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
       store.selectNode(nodeId);
 
       store.selectNode(null);
@@ -173,7 +178,7 @@ describe("Workflow Store", () => {
 
     it("should clear selection when node is deleted", () => {
       const store = useWorkflowStore();
-      const nodeId = store.addNode("start", { x: 100, y: 100 });
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 });
       store.selectNode(nodeId);
 
       store.removeNode(nodeId);
@@ -185,7 +190,7 @@ describe("Workflow Store", () => {
   describe("Undo/Redo", () => {
     it("should undo node addition", () => {
       const store = useWorkflowStore();
-      store.addNode("start", { x: 100, y: 100 });
+      store.addNode(NodeType.START, { x: 100, y: 100 });
 
       expect(store.nodes).toHaveLength(1);
       expect(store.canUndo).toBe(true);
@@ -197,7 +202,7 @@ describe("Workflow Store", () => {
 
     it("should redo node addition", () => {
       const store = useWorkflowStore();
-      store.addNode("start", { x: 100, y: 100 });
+      store.addNode(NodeType.START, { x: 100, y: 100 });
       store.undo();
 
       expect(store.nodes).toHaveLength(0);
@@ -219,7 +224,7 @@ describe("Workflow Store", () => {
 
     it("should not redo when at latest state", () => {
       const store = useWorkflowStore();
-      store.addNode("start", { x: 100, y: 100 });
+      store.addNode(NodeType.START, { x: 100, y: 100 });
 
       expect(store.canRedo).toBe(false);
       store.redo(); // Should not throw
@@ -231,8 +236,8 @@ describe("Workflow Store", () => {
   describe("Export/Import", () => {
     it("should export workflow state", () => {
       const store = useWorkflowStore();
-      store.addNode("start", { x: 100, y: 100 });
-      store.addNode("end", { x: 300, y: 100 });
+      store.addNode(NodeType.START, { x: 100, y: 100 });
+      store.addNode(NodeType.END, { x: 300, y: 100 });
 
       const exported = store.exportWorkflow();
 
@@ -247,12 +252,12 @@ describe("Workflow Store", () => {
         nodes: [
           {
             id: "node_1",
-            type: "start" as const,
+            type: NodeType.START,
             position: { x: 100, y: 100 },
             data: {
               label: "Start",
               config: { payload: { message: "test" } },
-              nodeType: "start" as const,
+              nodeType: NodeType.START,
             },
           },
         ],
@@ -270,8 +275,8 @@ describe("Workflow Store", () => {
   describe("Clear Workflow", () => {
     it("should clear all nodes and edges", () => {
       const store = useWorkflowStore();
-      const node1Id = store.addNode("start", { x: 100, y: 100 });
-      const node2Id = store.addNode("end", { x: 300, y: 100 });
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 });
+      const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 });
       store.addEdge(node1Id, node2Id);
 
       store.clearWorkflow();
@@ -291,7 +296,7 @@ describe("Workflow Execution", () => {
 
   it("should show error when no start node exists", async () => {
     const store = useWorkflowStore();
-    store.addNode("end", { x: 100, y: 100 });
+    store.addNode(NodeType.END, { x: 100, y: 100 });
 
     await store.executeWorkflow();
 
@@ -306,34 +311,34 @@ describe("Workflow Execution", () => {
 
   it("should execute a simple workflow", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, endId);
 
     await store.executeWorkflow();
 
     expect(store.executionLogs.length).toBeGreaterThan(0);
-    expect(store.executionLogs.some((log) => log.nodeType === "start")).toBe(
-      true
-    );
-    expect(store.executionLogs.some((log) => log.nodeType === "end")).toBe(
-      true
-    );
+    expect(
+      store.executionLogs.some((log) => log.nodeType === NodeType.START)
+    ).toBe(true);
+    expect(
+      store.executionLogs.some((log) => log.nodeType === NodeType.END)
+    ).toBe(true);
   });
 
   it("should apply uppercase transform", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "hello" } });
 
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
     store.updateNodeConfig(transformId, {
-      operation: "uppercase",
+      operation: TransformOperation.UPPERCASE,
       field: "message",
       value: "",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
 
     store.addEdge(startId, transformId);
     store.addEdge(transformId, endId);
@@ -341,24 +346,24 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const transformLog = store.executionLogs.find(
-      (log) => log.nodeType === "transform"
+      (log) => log.nodeType === NodeType.TRANSFORM
     );
     expect(transformLog?.output.message).toBe("HELLO");
   });
 
   it("should apply lowercase transform", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "HELLO" } });
 
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
     store.updateNodeConfig(transformId, {
-      operation: "lowercase",
+      operation: TransformOperation.LOWERCASE,
       field: "message",
       value: "",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
 
     store.addEdge(startId, transformId);
     store.addEdge(transformId, endId);
@@ -366,24 +371,24 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const transformLog = store.executionLogs.find(
-      (log) => log.nodeType === "transform"
+      (log) => log.nodeType === NodeType.TRANSFORM
     );
     expect(transformLog?.output.message).toBe("hello");
   });
 
   it("should apply append transform", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "hello" } });
 
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
     store.updateNodeConfig(transformId, {
-      operation: "append",
+      operation: TransformOperation.APPEND,
       field: "message",
       value: " world",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
 
     store.addEdge(startId, transformId);
     store.addEdge(transformId, endId);
@@ -391,24 +396,24 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const transformLog = store.executionLogs.find(
-      (log) => log.nodeType === "transform"
+      (log) => log.nodeType === NodeType.TRANSFORM
     );
     expect(transformLog?.output.message).toBe("hello world");
   });
 
   it("should apply multiply transform", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { value: 5 } });
 
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
     store.updateNodeConfig(transformId, {
-      operation: "multiply",
+      operation: TransformOperation.MULTIPLY,
       field: "value",
       value: 3,
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
 
     store.addEdge(startId, transformId);
     store.addEdge(transformId, endId);
@@ -416,24 +421,24 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const transformLog = store.executionLogs.find(
-      (log) => log.nodeType === "transform"
+      (log) => log.nodeType === NodeType.TRANSFORM
     );
     expect(transformLog?.output.value).toBe(15);
   });
 
   it("should apply add transform", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { value: 10 } });
 
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
     store.updateNodeConfig(transformId, {
-      operation: "add",
+      operation: TransformOperation.ADD,
       field: "value",
       value: 5,
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
 
     store.addEdge(startId, transformId);
     store.addEdge(transformId, endId);
@@ -441,27 +446,27 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const transformLog = store.executionLogs.find(
-      (log) => log.nodeType === "transform"
+      (log) => log.nodeType === NodeType.TRANSFORM
     );
     expect(transformLog?.output.value).toBe(15);
   });
 
   it("should follow true branch in condition node", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { value: 50 } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "value",
-      operator: "greaterThan",
+      operator: ConditionOperator.GREATER_THAN,
       value: "25",
     });
 
-    const trueEndId = store.addNode("end", { x: 350, y: 50 });
+    const trueEndId = store.addNode(NodeType.END, { x: 350, y: 50 });
     store.updateNodeLabel(trueEndId, "True End");
 
-    const falseEndId = store.addNode("end", { x: 350, y: 150 });
+    const falseEndId = store.addNode(NodeType.END, { x: 350, y: 150 });
     store.updateNodeLabel(falseEndId, "False End");
 
     store.addEdge(startId, conditionId);
@@ -471,7 +476,7 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
 
@@ -483,20 +488,20 @@ describe("Workflow Execution", () => {
 
   it("should follow false branch in condition node", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { value: 10 } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "value",
-      operator: "greaterThan",
+      operator: ConditionOperator.GREATER_THAN,
       value: "25",
     });
 
-    const trueEndId = store.addNode("end", { x: 350, y: 50 });
+    const trueEndId = store.addNode(NodeType.END, { x: 350, y: 50 });
     store.updateNodeLabel(trueEndId, "True End");
 
-    const falseEndId = store.addNode("end", { x: 350, y: 150 });
+    const falseEndId = store.addNode(NodeType.END, { x: 350, y: 150 });
     store.updateNodeLabel(falseEndId, "False End");
 
     store.addEdge(startId, conditionId);
@@ -506,7 +511,7 @@ describe("Workflow Execution", () => {
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(false);
 
@@ -518,14 +523,14 @@ describe("Workflow Execution", () => {
 
   it("should detect cycles and prevent infinite loops", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
-    const transformId = store.addNode("transform", { x: 200, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
+    const transformId = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 });
 
     store.addEdge(startId, transformId);
     // Note: connecting transform back to start should fail due to validation
     // (Start nodes cannot have incoming connections)
     // So we test with transform nodes creating a cycle
-    const transform2Id = store.addNode("transform", { x: 300, y: 100 });
+    const transform2Id = store.addNode(NodeType.TRANSFORM, { x: 300, y: 100 });
     store.addEdge(transformId, transform2Id);
     store.addEdge(transform2Id, transformId); // Creates a cycle
 
@@ -542,120 +547,120 @@ describe("Workflow Execution", () => {
 
   it("should handle equals condition operator", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { status: "active" } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "status",
-      operator: "equals",
+      operator: ConditionOperator.EQUALS,
       value: "active",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, conditionId);
     store.addEdge(conditionId, endId, "true");
 
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
   });
 
   it("should handle notEquals condition operator", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { status: "inactive" } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "status",
-      operator: "notEquals",
+      operator: ConditionOperator.NOT_EQUALS,
       value: "active",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, conditionId);
     store.addEdge(conditionId, endId, "true");
 
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
   });
 
   it("should handle contains condition operator", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "hello world" } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "message",
-      operator: "contains",
+      operator: ConditionOperator.CONTAINS,
       value: "world",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, conditionId);
     store.addEdge(conditionId, endId, "true");
 
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
   });
 
   it("should handle isEmpty condition operator", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "" } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "message",
-      operator: "isEmpty",
+      operator: ConditionOperator.IS_EMPTY,
       value: "",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, conditionId);
     store.addEdge(conditionId, endId, "true");
 
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
   });
 
   it("should handle isNotEmpty condition operator", async () => {
     const store = useWorkflowStore();
-    const startId = store.addNode("start", { x: 100, y: 100 });
+    const startId = store.addNode(NodeType.START, { x: 100, y: 100 });
     store.updateNodeConfig(startId, { payload: { message: "hello" } });
 
-    const conditionId = store.addNode("condition", { x: 200, y: 100 });
+    const conditionId = store.addNode(NodeType.CONDITION, { x: 200, y: 100 });
     store.updateNodeConfig(conditionId, {
       field: "message",
-      operator: "isNotEmpty",
+      operator: ConditionOperator.IS_NOT_EMPTY,
       value: "",
     });
 
-    const endId = store.addNode("end", { x: 300, y: 100 });
+    const endId = store.addNode(NodeType.END, { x: 300, y: 100 });
     store.addEdge(startId, conditionId);
     store.addEdge(conditionId, endId, "true");
 
     await store.executeWorkflow();
 
     const conditionLog = store.executionLogs.find(
-      (log) => log.nodeType === "condition"
+      (log) => log.nodeType === NodeType.CONDITION
     );
     expect(conditionLog?.output._conditionMet).toBe(true);
   });
@@ -672,7 +677,7 @@ describe("Validation Functions", () => {
     store.executionLogs.push({
       nodeId: "test",
       nodeName: "Test",
-      nodeType: "start",
+      nodeType: NodeType.START,
       input: {},
       output: {},
       timestamp: Date.now(),

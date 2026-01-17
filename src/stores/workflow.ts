@@ -1,9 +1,13 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
+import {
+  NodeType,
+  TransformOperation,
+  ConditionOperator,
+} from "../types/workflow";
 import type {
   WorkflowNode,
   WorkflowEdge,
-  NodeType,
   NodeConfig,
   StartNodeConfig,
   TransformNodeConfig,
@@ -22,21 +26,21 @@ import {
 // Default configurations for each node type
 const getDefaultConfig = (type: NodeType): NodeConfig => {
   switch (type) {
-    case "start":
+    case NodeType.START:
       return { payload: { message: "Hello World" } } as StartNodeConfig;
-    case "transform":
+    case NodeType.TRANSFORM:
       return {
-        operation: "uppercase",
+        operation: TransformOperation.UPPERCASE,
         field: "message",
         value: "",
       } as TransformNodeConfig;
-    case "condition":
+    case NodeType.CONDITION:
       return {
         field: "message",
-        operator: "equals",
+        operator: ConditionOperator.EQUALS,
         value: "",
       } as ConditionNodeConfig;
-    case "end":
+    case NodeType.END:
       return { label: "End" } as EndNodeConfig;
     default:
       return { payload: {} } as StartNodeConfig;
@@ -45,13 +49,13 @@ const getDefaultConfig = (type: NodeType): NodeConfig => {
 
 const getNodeLabel = (type: NodeType): string => {
   switch (type) {
-    case "start":
+    case NodeType.START:
       return "Start";
-    case "transform":
+    case NodeType.TRANSFORM:
       return "Transform";
-    case "condition":
+    case NodeType.CONDITION:
       return "If-Else";
-    case "end":
+    case NodeType.END:
       return "End";
     default:
       return "Node";
@@ -339,7 +343,7 @@ export const useWorkflowStore = defineStore("workflow", () => {
       executionLogs.value.push({
         nodeId: "system",
         nodeName: "System",
-        nodeType: "start",
+        nodeType: NodeType.START,
         input: {},
         output: {},
         timestamp: Date.now(),
@@ -354,7 +358,7 @@ export const useWorkflowStore = defineStore("workflow", () => {
         executionLogs.value.push({
           nodeId: "system",
           nodeName: "System",
-          nodeType: "start",
+          nodeType: NodeType.START,
           input: {},
           output: {},
           timestamp: Date.now(),
@@ -367,13 +371,15 @@ export const useWorkflowStore = defineStore("workflow", () => {
     }
 
     // Find start nodes
-    const startNodes = nodes.value.filter((n) => n.data.nodeType === "start");
+    const startNodes = nodes.value.filter(
+      (n) => n.data.nodeType === NodeType.START
+    );
 
     if (startNodes.length === 0) {
       executionLogs.value.push({
         nodeId: "system",
         nodeName: "System",
-        nodeType: "start",
+        nodeType: NodeType.START,
         input: {},
         output: {},
         timestamp: Date.now(),
@@ -438,51 +444,51 @@ export const useWorkflowStore = defineStore("workflow", () => {
 
     try {
       switch (node.data.nodeType) {
-        case "start": {
+        case NodeType.START: {
           const config = node.data.config as StartNodeConfig;
           outputData = { ...config.payload };
           message = "Started workflow execution";
           break;
         }
 
-        case "transform": {
+        case NodeType.TRANSFORM: {
           const config = node.data.config as TransformNodeConfig;
           const fieldValue = inputData[config.field];
 
           switch (config.operation) {
-            case "uppercase":
+            case TransformOperation.UPPERCASE:
               if (typeof fieldValue === "string") {
                 outputData[config.field] = fieldValue.toUpperCase();
               }
               break;
-            case "lowercase":
+            case TransformOperation.LOWERCASE:
               if (typeof fieldValue === "string") {
                 outputData[config.field] = fieldValue.toLowerCase();
               }
               break;
-            case "append":
+            case TransformOperation.APPEND:
               if (typeof fieldValue === "string") {
                 outputData[config.field] = fieldValue + (config.value || "");
               }
               break;
-            case "prepend":
+            case TransformOperation.PREPEND:
               if (typeof fieldValue === "string") {
                 outputData[config.field] = (config.value || "") + fieldValue;
               }
               break;
-            case "multiply":
+            case TransformOperation.MULTIPLY:
               if (typeof fieldValue === "number") {
                 outputData[config.field] =
                   fieldValue * (Number(config.value) || 1);
               }
               break;
-            case "add":
+            case TransformOperation.ADD:
               if (typeof fieldValue === "number") {
                 outputData[config.field] =
                   fieldValue + (Number(config.value) || 0);
               }
               break;
-            case "replace":
+            case TransformOperation.REPLACE:
               outputData[config.field] = config.value;
               break;
           }
@@ -490,48 +496,48 @@ export const useWorkflowStore = defineStore("workflow", () => {
           break;
         }
 
-        case "condition": {
+        case NodeType.CONDITION: {
           const config = node.data.config as ConditionNodeConfig;
           const fieldValue = inputData[config.field];
           let conditionMet = false;
 
           switch (config.operator) {
-            case "equals":
+            case ConditionOperator.EQUALS:
               conditionMet = fieldValue === config.value;
               break;
-            case "notEquals":
+            case ConditionOperator.NOT_EQUALS:
               conditionMet = fieldValue !== config.value;
               break;
-            case "contains":
+            case ConditionOperator.CONTAINS:
               conditionMet = String(fieldValue).includes(String(config.value));
               break;
-            case "greaterThan":
+            case ConditionOperator.GREATER_THAN:
               conditionMet = Number(fieldValue) > Number(config.value);
               break;
-            case "lessThan":
+            case ConditionOperator.LESS_THAN:
               conditionMet = Number(fieldValue) < Number(config.value);
               break;
-            case "greaterThanOrEqual":
+            case ConditionOperator.GREATER_THAN_OR_EQUAL:
               conditionMet = Number(fieldValue) >= Number(config.value);
               break;
-            case "lessThanOrEqual":
+            case ConditionOperator.LESS_THAN_OR_EQUAL:
               conditionMet = Number(fieldValue) <= Number(config.value);
               break;
-            case "isEmpty":
+            case ConditionOperator.IS_EMPTY:
               conditionMet = !fieldValue || fieldValue === "";
               break;
-            case "isNotEmpty":
+            case ConditionOperator.IS_NOT_EMPTY:
               conditionMet = !!fieldValue && fieldValue !== "";
               break;
-            case "isEven":
+            case ConditionOperator.IS_EVEN:
               conditionMet =
                 typeof fieldValue === "number" && fieldValue % 2 === 0;
               break;
-            case "isOdd":
+            case ConditionOperator.IS_ODD:
               conditionMet =
                 typeof fieldValue === "number" && fieldValue % 2 !== 0;
               break;
-            case "isDivisibleBy":
+            case ConditionOperator.IS_DIVISIBLE_BY:
               conditionMet =
                 typeof fieldValue === "number" &&
                 Number(config.value) !== 0 &&
@@ -546,7 +552,7 @@ export const useWorkflowStore = defineStore("workflow", () => {
           break;
         }
 
-        case "end": {
+        case NodeType.END: {
           message = "Workflow execution completed";
           break;
         }
@@ -576,7 +582,7 @@ export const useWorkflowStore = defineStore("workflow", () => {
         const nextNode = nodes.value.find((n) => n.id === nextNodeId);
         if (nextNode) {
           // For condition nodes, check which branch to follow
-          if (node.data.nodeType === "condition") {
+          if (node.data.nodeType === NodeType.CONDITION) {
             const edge = edges.value.find(
               (e) => e.source === node.id && e.target === nextNodeId
             );

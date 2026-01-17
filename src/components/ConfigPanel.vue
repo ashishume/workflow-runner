@@ -1,136 +1,146 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useWorkflowStore } from '../stores/workflow'
-import type { 
-  StartNodeConfig, 
-  TransformNodeConfig, 
-  ConditionNodeConfig,
+import { computed, ref, watch } from "vue";
+import { useWorkflowStore } from "../stores/workflow";
+import {
+  NodeType,
   TransformOperation,
-  ConditionOperator 
-} from '../types/workflow'
-import { CloseIcon, ClockIcon, TrashIcon } from '../assets/icons'
+  ConditionOperator,
+} from "../types/workflow";
+import type {
+  StartNodeConfig,
+  TransformNodeConfig,
+  ConditionNodeConfig,
+} from "../types/workflow";
+import { CloseIcon, ClockIcon, TrashIcon } from "../assets/icons";
 
-const store = useWorkflowStore()
+const store = useWorkflowStore();
 
-const selectedNode = computed(() => store.selectedNode)
+const selectedNode = computed(() => store.selectedNode);
 
 // Local state for editing
-const localLabel = ref('')
-const localPayload = ref('')
-const localOperation = ref<TransformOperation>('uppercase')
-const localField = ref('')
-const localValue = ref('')
-const localOperator = ref<ConditionOperator>('equals')
-const localConditionValue = ref('')
-const localConditionField = ref('')
+const localLabel = ref("");
+const localPayload = ref("");
+const localOperation = ref<TransformOperation>(TransformOperation.UPPERCASE);
+const localField = ref("");
+const localValue = ref("");
+const localOperator = ref<ConditionOperator>(ConditionOperator.EQUALS);
+const localConditionValue = ref("");
+const localConditionField = ref("");
 
-const payloadError = ref('')
+const payloadError = ref("");
 
 // Transform operations
 const transformOperations: { value: TransformOperation; label: string }[] = [
-  { value: 'uppercase', label: 'To Uppercase' },
-  { value: 'lowercase', label: 'To Lowercase' },
-  { value: 'append', label: 'Append Text' },
-  { value: 'prepend', label: 'Prepend Text' },
-  { value: 'multiply', label: 'Multiply Number' },
-  { value: 'add', label: 'Add Number' },
-  { value: 'replace', label: 'Replace Value' }
-]
+  { value: TransformOperation.UPPERCASE, label: "To Uppercase" },
+  { value: TransformOperation.LOWERCASE, label: "To Lowercase" },
+  { value: TransformOperation.APPEND, label: "Append Text" },
+  { value: TransformOperation.PREPEND, label: "Prepend Text" },
+  { value: TransformOperation.MULTIPLY, label: "Multiply Number" },
+  { value: TransformOperation.ADD, label: "Add Number" },
+  { value: TransformOperation.REPLACE, label: "Replace Value" },
+];
 
 // Condition operators
 const conditionOperators: { value: ConditionOperator; label: string }[] = [
-  { value: 'equals', label: 'Equals' },
-  { value: 'notEquals', label: 'Not Equals' },
-  { value: 'contains', label: 'Contains' },
-  { value: 'greaterThan', label: 'Greater Than' },
-  { value: 'lessThan', label: 'Less Than' },
-  { value: 'greaterThanOrEqual', label: 'Greater Than or Equal' },
-  { value: 'lessThanOrEqual', label: 'Less Than or Equal' },
-  { value: 'isEmpty', label: 'Is Empty' },
-  { value: 'isNotEmpty', label: 'Is Not Empty' },
-  { value: 'isEven', label: 'Is Even Number' },
-  { value: 'isOdd', label: 'Is Odd Number' },
-  { value: 'isDivisibleBy', label: 'Is Divisible By' }
-]
+  { value: ConditionOperator.EQUALS, label: "Equals" },
+  { value: ConditionOperator.NOT_EQUALS, label: "Not Equals" },
+  { value: ConditionOperator.CONTAINS, label: "Contains" },
+  { value: ConditionOperator.GREATER_THAN, label: "Greater Than" },
+  { value: ConditionOperator.LESS_THAN, label: "Less Than" },
+  {
+    value: ConditionOperator.GREATER_THAN_OR_EQUAL,
+    label: "Greater Than or Equal",
+  },
+  { value: ConditionOperator.LESS_THAN_OR_EQUAL, label: "Less Than or Equal" },
+  { value: ConditionOperator.IS_EMPTY, label: "Is Empty" },
+  { value: ConditionOperator.IS_NOT_EMPTY, label: "Is Not Empty" },
+  { value: ConditionOperator.IS_EVEN, label: "Is Even Number" },
+  { value: ConditionOperator.IS_ODD, label: "Is Odd Number" },
+  { value: ConditionOperator.IS_DIVISIBLE_BY, label: "Is Divisible By" },
+];
 
 // Watch for selected node changes
-watch(selectedNode, (node) => {
-  if (node) {
-    localLabel.value = node.data.label
-    
-    switch (node.data.nodeType) {
-      case 'start': {
-        const config = node.data.config as StartNodeConfig
-        localPayload.value = JSON.stringify(config.payload, null, 2)
-        payloadError.value = ''
-        break
-      }
-      case 'transform': {
-        const config = node.data.config as TransformNodeConfig
-        localOperation.value = config.operation
-        localField.value = config.field
-        localValue.value = String(config.value || '')
-        break
-      }
-      case 'condition': {
-        const config = node.data.config as ConditionNodeConfig
-        localConditionField.value = config.field
-        localOperator.value = config.operator
-        localConditionValue.value = String(config.value || '')
-        break
+watch(
+  selectedNode,
+  (node) => {
+    if (node) {
+      localLabel.value = node.data.label;
+
+      switch (node.data.nodeType) {
+        case NodeType.START: {
+          const config = node.data.config as StartNodeConfig;
+          localPayload.value = JSON.stringify(config.payload, null, 2);
+          payloadError.value = "";
+          break;
+        }
+        case NodeType.TRANSFORM: {
+          const config = node.data.config as TransformNodeConfig;
+          localOperation.value = config.operation;
+          localField.value = config.field;
+          localValue.value = String(config.value || "");
+          break;
+        }
+        case NodeType.CONDITION: {
+          const config = node.data.config as ConditionNodeConfig;
+          localConditionField.value = config.field;
+          localOperator.value = config.operator;
+          localConditionValue.value = String(config.value || "");
+          break;
+        }
       }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+);
 
 // Update handlers
 const updateLabel = () => {
   if (selectedNode.value) {
-    store.updateNodeLabel(selectedNode.value.id, localLabel.value)
+    store.updateNodeLabel(selectedNode.value.id, localLabel.value);
   }
-}
+};
 
 const updateStartPayload = () => {
   if (selectedNode.value) {
     try {
-      const payload = JSON.parse(localPayload.value)
-      store.updateNodeConfig(selectedNode.value.id, { payload })
-      payloadError.value = ''
+      const payload = JSON.parse(localPayload.value);
+      store.updateNodeConfig(selectedNode.value.id, { payload });
+      payloadError.value = "";
     } catch {
-      payloadError.value = 'Invalid JSON format'
+      payloadError.value = "Invalid JSON format";
     }
   }
-}
+};
 
 const updateTransformConfig = () => {
   if (selectedNode.value) {
     store.updateNodeConfig(selectedNode.value.id, {
       operation: localOperation.value,
       field: localField.value,
-      value: localValue.value
-    })
+      value: localValue.value,
+    });
   }
-}
+};
 
 const updateConditionConfig = () => {
   if (selectedNode.value) {
     store.updateNodeConfig(selectedNode.value.id, {
       field: localConditionField.value,
       operator: localOperator.value,
-      value: localConditionValue.value
-    })
+      value: localConditionValue.value,
+    });
   }
-}
+};
 
 const deleteNode = () => {
   if (selectedNode.value) {
-    store.removeNode(selectedNode.value.id)
+    store.removeNode(selectedNode.value.id);
   }
-}
+};
 
 const closePanel = () => {
-  store.selectNode(null)
-}
+  store.selectNode(null);
+};
 </script>
 
 <template>
@@ -146,105 +156,134 @@ const closePanel = () => {
         <CloseIcon :size="20" />
       </button>
     </div>
-    
+
     <div class="panel-content">
       <!-- Common: Label -->
       <div class="form-group">
         <label>Node Label</label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           v-model="localLabel"
           @change="updateLabel"
           placeholder="Enter node label"
         />
       </div>
-      
+
       <!-- Start Node Config -->
-      <template v-if="selectedNode.data.nodeType === 'start'">
+      <template v-if="selectedNode.data.nodeType === NodeType.START">
         <div class="form-group">
           <label>Input Payload (JSON)</label>
-          <textarea 
+          <textarea
             v-model="localPayload"
             @change="updateStartPayload"
             rows="8"
             placeholder='{"message": "Hello World"}'
           ></textarea>
           <span v-if="payloadError" class="error-text">{{ payloadError }}</span>
-          <span class="hint-text">Enter the initial data to pass through the workflow</span>
+          <span class="hint-text"
+            >Enter the initial data to pass through the workflow</span
+          >
         </div>
       </template>
-      
+
       <!-- Transform Node Config -->
-      <template v-if="selectedNode.data.nodeType === 'transform'">
+      <template v-if="selectedNode.data.nodeType === NodeType.TRANSFORM">
         <div class="form-group">
           <label>Field to Transform</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             v-model="localField"
             @change="updateTransformConfig"
             placeholder="e.g., message"
           />
         </div>
-        
+
         <div class="form-group">
           <label>Operation</label>
           <select v-model="localOperation" @change="updateTransformConfig">
-            <option 
-              v-for="op in transformOperations" 
-              :key="op.value" 
+            <option
+              v-for="op in transformOperations"
+              :key="op.value"
               :value="op.value"
             >
               {{ op.label }}
             </option>
           </select>
         </div>
-        
-        <div class="form-group" v-if="['append', 'prepend', 'multiply', 'add', 'replace'].includes(localOperation)">
+
+        <div
+          class="form-group"
+          v-if="
+            localOperation === TransformOperation.APPEND ||
+            localOperation === TransformOperation.PREPEND ||
+            localOperation === TransformOperation.MULTIPLY ||
+            localOperation === TransformOperation.ADD ||
+            localOperation === TransformOperation.REPLACE
+          "
+        >
           <label>Value</label>
-          <input 
-            :type="['multiply', 'add'].includes(localOperation) ? 'number' : 'text'"
+          <input
+            :type="
+              localOperation === TransformOperation.MULTIPLY ||
+              localOperation === TransformOperation.ADD
+                ? 'number'
+                : 'text'
+            "
             v-model="localValue"
             @change="updateTransformConfig"
-            :placeholder="['multiply', 'add'].includes(localOperation) ? '0' : 'Enter value'"
+            :placeholder="
+              localOperation === TransformOperation.MULTIPLY ||
+              localOperation === TransformOperation.ADD
+                ? '0'
+                : 'Enter value'
+            "
           />
         </div>
       </template>
-      
+
       <!-- Condition Node Config -->
-      <template v-if="selectedNode.data.nodeType === 'condition'">
+      <template v-if="selectedNode.data.nodeType === NodeType.CONDITION">
         <div class="form-group">
           <label>Field to Check</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             v-model="localConditionField"
             @change="updateConditionConfig"
             placeholder="e.g., message"
           />
         </div>
-        
+
         <div class="form-group">
           <label>Condition</label>
           <select v-model="localOperator" @change="updateConditionConfig">
-            <option 
-              v-for="op in conditionOperators" 
-              :key="op.value" 
+            <option
+              v-for="op in conditionOperators"
+              :key="op.value"
               :value="op.value"
             >
               {{ op.label }}
             </option>
           </select>
         </div>
-        
-        <div class="form-group" v-if="!['isEmpty', 'isNotEmpty', 'isEven', 'isOdd'].includes(localOperator)">
+
+        <div
+          class="form-group"
+          v-if="
+            localOperator !== ConditionOperator.IS_EMPTY &&
+            localOperator !== ConditionOperator.IS_NOT_EMPTY &&
+            localOperator !== ConditionOperator.IS_EVEN &&
+            localOperator !== ConditionOperator.IS_ODD
+          "
+        >
           <label>Compare Value</label>
-          <input 
+          <input
             type="text"
             v-model="localConditionValue"
             @change="updateConditionConfig"
             placeholder="Value to compare"
           />
         </div>
-        
+
         <div class="condition-info">
           <div class="branch-indicator true-branch">
             <span class="indicator"></span>
@@ -256,17 +295,20 @@ const closePanel = () => {
           </div>
         </div>
       </template>
-      
+
       <!-- End Node Config -->
-      <template v-if="selectedNode.data.nodeType === 'end'">
+      <template v-if="selectedNode.data.nodeType === NodeType.END">
         <div class="end-info">
           <ClockIcon :size="40" />
           <p>This node marks the end of a workflow branch.</p>
-          <p class="sub-info">The final payload will be displayed in the execution logs when the workflow runs.</p>
+          <p class="sub-info">
+            The final payload will be displayed in the execution logs when the
+            workflow runs.
+          </p>
         </div>
       </template>
     </div>
-    
+
     <div class="panel-footer">
       <button class="delete-btn" @click="deleteNode">
         <TrashIcon :size="16" />
@@ -401,7 +443,7 @@ const closePanel = () => {
   }
 
   textarea {
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: "Monaco", "Consolas", monospace;
     resize: vertical;
     min-height: 100px;
   }

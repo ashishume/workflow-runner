@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { NodeType } from "../types/workflow";
+import { NodeType } from "../types/workflow";
 import {
   PlayIcon,
   TransformIcon,
@@ -23,28 +23,28 @@ interface NodeItem {
 
 const nodes: NodeItem[] = [
   {
-    type: "start",
+    type: NodeType.START,
     label: "Start",
     description: "Begin workflow with payload",
     icon: "play",
     color: "#4ade80",
   },
   {
-    type: "transform",
+    type: NodeType.TRANSFORM,
     label: "Transform",
     description: "Modify data fields",
     icon: "transform",
     color: "#a78bfa",
   },
   {
-    type: "condition",
+    type: NodeType.CONDITION,
     label: "If-Else",
     description: "Conditional branching",
     icon: "branch",
     color: "#fbbf24",
   },
   {
-    type: "end",
+    type: NodeType.END,
     label: "End",
     description: "Terminate workflow",
     icon: "stop",

@@ -5,29 +5,30 @@ import {
   validateImportedWorkflow,
   validateJSON
 } from './validation'
+import { NodeType, TransformOperation, ConditionOperator } from '../types/workflow'
 import type { WorkflowNode, WorkflowEdge } from '../types/workflow'
 
 // Helper to create mock nodes
-const createNode = (id: string, type: 'start' | 'transform' | 'condition' | 'end', label?: string): WorkflowNode => ({
+const createNode = (id: string, type: NodeType, label?: string): WorkflowNode => ({
   id,
   type,
   position: { x: 0, y: 0 },
   data: {
     label: label || type.charAt(0).toUpperCase() + type.slice(1),
     nodeType: type,
-    config: type === 'start' 
+    config: type === NodeType.START 
       ? { payload: {} }
-      : type === 'transform'
-      ? { operation: 'uppercase', field: 'message', value: '' }
-      : type === 'condition'
-      ? { field: 'value', operator: 'equals', value: '' }
+      : type === NodeType.TRANSFORM
+      ? { operation: TransformOperation.UPPERCASE, field: 'message', value: '' }
+      : type === NodeType.CONDITION
+      ? { field: 'value', operator: ConditionOperator.EQUALS, value: '' }
       : { label: 'End' }
   }
 })
 
 describe('isValidConnection', () => {
   it('should prevent self-loops', () => {
-    const node = createNode('node1', 'transform')
+    const node = createNode('node1', NodeType.TRANSFORM)
     const result = isValidConnection(node, node, [])
     
     expect(result.valid).toBe(false)
@@ -35,8 +36,8 @@ describe('isValidConnection', () => {
   })
 
   it('should prevent duplicate connections', () => {
-    const sourceNode = createNode('node1', 'start')
-    const targetNode = createNode('node2', 'end')
+    const sourceNode = createNode('node1', NodeType.START)
+    const targetNode = createNode('node2', NodeType.END)
     const existingEdges: WorkflowEdge[] = [
       { id: 'edge1', source: 'node1', target: 'node2' }
     ]
@@ -48,8 +49,8 @@ describe('isValidConnection', () => {
   })
 
   it('should prevent End nodes from having outgoing connections', () => {
-    const sourceNode = createNode('node1', 'end')
-    const targetNode = createNode('node2', 'transform')
+    const sourceNode = createNode('node1', NodeType.END)
+    const targetNode = createNode('node2', NodeType.TRANSFORM)
     
     const result = isValidConnection(sourceNode, targetNode, [])
     
@@ -58,8 +59,8 @@ describe('isValidConnection', () => {
   })
 
   it('should prevent Start nodes from having incoming connections', () => {
-    const sourceNode = createNode('node1', 'transform')
-    const targetNode = createNode('node2', 'start')
+    const sourceNode = createNode('node1', NodeType.TRANSFORM)
+    const targetNode = createNode('node2', NodeType.START)
     
     const result = isValidConnection(sourceNode, targetNode, [])
     
@@ -68,8 +69,8 @@ describe('isValidConnection', () => {
   })
 
   it('should allow valid connections', () => {
-    const sourceNode = createNode('node1', 'start')
-    const targetNode = createNode('node2', 'transform')
+    const sourceNode = createNode('node1', NodeType.START)
+    const targetNode = createNode('node2', NodeType.TRANSFORM)
     
     const result = isValidConnection(sourceNode, targetNode, [])
     
@@ -77,8 +78,8 @@ describe('isValidConnection', () => {
   })
 
   it('should allow connecting Transform to End', () => {
-    const sourceNode = createNode('node1', 'transform')
-    const targetNode = createNode('node2', 'end')
+    const sourceNode = createNode('node1', NodeType.TRANSFORM)
+    const targetNode = createNode('node2', NodeType.END)
     
     const result = isValidConnection(sourceNode, targetNode, [])
     
@@ -86,8 +87,8 @@ describe('isValidConnection', () => {
   })
 
   it('should allow connecting Condition to Transform', () => {
-    const sourceNode = createNode('node1', 'condition')
-    const targetNode = createNode('node2', 'transform')
+    const sourceNode = createNode('node1', NodeType.CONDITION)
+    const targetNode = createNode('node2', NodeType.TRANSFORM)
     
     const result = isValidConnection(sourceNode, targetNode, [])
     
@@ -104,7 +105,7 @@ describe('validateWorkflow', () => {
   })
 
   it('should return error when no Start node exists', () => {
-    const nodes = [createNode('node1', 'end')]
+    const nodes = [createNode('node1', NodeType.END)]
     const result = validateWorkflow(nodes, [])
     
     expect(result.valid).toBe(false)
@@ -112,7 +113,7 @@ describe('validateWorkflow', () => {
   })
 
   it('should return warning when no End node exists', () => {
-    const nodes = [createNode('node1', 'start')]
+    const nodes = [createNode('node1', NodeType.START)]
     const result = validateWorkflow(nodes, [])
     
     expect(result.valid).toBe(true) // It's a warning, not error
@@ -121,8 +122,8 @@ describe('validateWorkflow', () => {
 
   it('should warn about disconnected Start nodes', () => {
     const nodes = [
-      createNode('node1', 'start'),
-      createNode('node2', 'end')
+      createNode('node1', NodeType.START),
+      createNode('node2', NodeType.END)
     ]
     const result = validateWorkflow(nodes, [])
     
@@ -131,8 +132,8 @@ describe('validateWorkflow', () => {
 
   it('should warn about disconnected End nodes', () => {
     const nodes = [
-      createNode('node1', 'start'),
-      createNode('node2', 'end')
+      createNode('node1', NodeType.START),
+      createNode('node2', NodeType.END)
     ]
     const edges: WorkflowEdge[] = []
     const result = validateWorkflow(nodes, edges)
@@ -142,9 +143,9 @@ describe('validateWorkflow', () => {
 
   it('should validate a proper workflow', () => {
     const nodes = [
-      createNode('node1', 'start'),
-      createNode('node2', 'transform'),
-      createNode('node3', 'end')
+      createNode('node1', NodeType.START),
+      createNode('node2', NodeType.TRANSFORM),
+      createNode('node3', NodeType.END)
     ]
     const edges: WorkflowEdge[] = [
       { id: 'edge1', source: 'node1', target: 'node2' },
@@ -158,9 +159,9 @@ describe('validateWorkflow', () => {
 
   it('should warn about Transform nodes without connections', () => {
     const nodes = [
-      createNode('node1', 'start'),
-      createNode('node2', 'transform'),
-      createNode('node3', 'end')
+      createNode('node1', NodeType.START),
+      createNode('node2', NodeType.TRANSFORM),
+      createNode('node3', NodeType.END)
     ]
     const edges: WorkflowEdge[] = [
       { id: 'edge1', source: 'node1', target: 'node3' }
@@ -195,7 +196,7 @@ describe('validateImportedWorkflow', () => {
 
   it('should reject nodes without id', () => {
     const result = validateImportedWorkflow({
-      nodes: [{ type: 'start', position: { x: 0, y: 0 }, data: { nodeType: 'start' } }],
+      nodes: [{ type: NodeType.START, position: { x: 0, y: 0 }, data: { nodeType: NodeType.START } }],
       edges: []
     })
     
@@ -215,7 +216,7 @@ describe('validateImportedWorkflow', () => {
 
   it('should reject edges referencing non-existent nodes', () => {
     const result = validateImportedWorkflow({
-      nodes: [{ id: 'node1', type: 'start', position: { x: 0, y: 0 }, data: { nodeType: 'start' } }],
+      nodes: [{ id: 'node1', type: NodeType.START, position: { x: 0, y: 0 }, data: { nodeType: NodeType.START } }],
       edges: [{ id: 'edge1', source: 'node1', target: 'node999' }]
     })
     
@@ -226,8 +227,8 @@ describe('validateImportedWorkflow', () => {
   it('should accept valid workflow', () => {
     const result = validateImportedWorkflow({
       nodes: [
-        { id: 'node1', type: 'start', position: { x: 0, y: 0 }, data: { nodeType: 'start', label: 'Start', config: {} } },
-        { id: 'node2', type: 'end', position: { x: 100, y: 0 }, data: { nodeType: 'end', label: 'End', config: {} } }
+        { id: 'node1', type: NodeType.START, position: { x: 0, y: 0 }, data: { nodeType: NodeType.START, label: 'Start', config: {} } },
+        { id: 'node2', type: NodeType.END, position: { x: 100, y: 0 }, data: { nodeType: NodeType.END, label: 'End', config: {} } }
       ],
       edges: [
         { id: 'edge1', source: 'node1', target: 'node2' }
