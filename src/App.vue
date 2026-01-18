@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import { computed, onMounted } from 'vue'
 
-  import ConfigPanel from './components/ConfigPanel.vue'
+  import RHSConfigPanel from './components/RHSConfigPanel.vue'
   import ExecutionLogs from './components/ExecutionLogs.vue'
-  import NodePalette from './components/NodePalette.vue'
+  import LHSNodePalette from './components/LHSNodePalette.vue'
   import ToastContainer from './components/ToastContainer.vue'
   import Toolbar from './components/Toolbar.vue'
   import WorkflowCanvas from './components/WorkflowCanvas.vue'
@@ -24,12 +24,12 @@
   <div class="app" :class="{ 'dark-mode': isDarkMode }">
     <Toolbar />
     <div class="main-content">
-      <NodePalette />
+      <LHSNodePalette />
       <div class="canvas-container">
         <WorkflowCanvas />
         <ExecutionLogs />
       </div>
-      <ConfigPanel v-if="hasSelectedNode" />
+      <RHSConfigPanel v-if="hasSelectedNode" />
     </div>
   </div>
 
