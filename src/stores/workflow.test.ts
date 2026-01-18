@@ -161,6 +161,8 @@ describe('Workflow Store', () => {
 
       expect(store.selectedNodeId).toBe(nodeId)
       expect(store.selectedNode?.id).toBe(nodeId)
+      expect(store.selectedNodeIds.has(nodeId)).toBe(true)
+      expect(store.selectedNodeIds.size).toBe(1)
     })
 
     it('should deselect when selecting null', () => {
@@ -172,6 +174,7 @@ describe('Workflow Store', () => {
 
       expect(store.selectedNodeId).toBeNull()
       expect(store.selectedNode).toBeNull()
+      expect(store.selectedNodeIds.size).toBe(0)
     })
 
     it('should clear selection when node is deleted', () => {
@@ -182,6 +185,141 @@ describe('Workflow Store', () => {
       store.removeNode(nodeId)
 
       expect(store.selectedNodeId).toBeNull()
+      expect(store.selectedNodeIds.has(nodeId)).toBe(false)
+      expect(store.selectedNodeIds.size).toBe(0)
+    })
+
+    it('should select multiple nodes', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+      const node3Id = store.addNode(NodeType.END, { x: 300, y: 100 })
+
+      store.selectNodes([node1Id, node2Id, node3Id])
+
+      expect(store.selectedNodeIds.size).toBe(3)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(true)
+      expect(store.selectedNodeIds.has(node2Id)).toBe(true)
+      expect(store.selectedNodeIds.has(node3Id)).toBe(true)
+      expect(store.selectedNodeId).toBeNull() // Multiple selection clears selectedNodeId
+    })
+
+    it('should select all nodes', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+      const node3Id = store.addNode(NodeType.END, { x: 300, y: 100 })
+
+      store.selectAllNodes()
+
+      expect(store.selectedNodeIds.size).toBe(3)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(true)
+      expect(store.selectedNodeIds.has(node2Id)).toBe(true)
+      expect(store.selectedNodeIds.has(node3Id)).toBe(true)
+      expect(store.selectedNodeId).toBeNull()
+    })
+
+    it('should select all nodes when only one node exists', () => {
+      const store = useWorkflowStore()
+      const nodeId = store.addNode(NodeType.START, { x: 100, y: 100 })
+
+      store.selectAllNodes()
+
+      expect(store.selectedNodeIds.size).toBe(1)
+      expect(store.selectedNodeIds.has(nodeId)).toBe(true)
+      expect(store.selectedNodeId).toBeNull()
+    })
+
+    it('should handle selectAllNodes when no nodes exist', () => {
+      const store = useWorkflowStore()
+
+      store.selectAllNodes()
+
+      expect(store.selectedNodeIds.size).toBe(0)
+      expect(store.selectedNodeId).toBeNull()
+    })
+
+    it('should toggle node selection', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+
+      // Initially select node1
+      store.selectNode(node1Id)
+      expect(store.selectedNodeIds.size).toBe(1)
+      expect(store.selectedNodeId).toBe(node1Id)
+
+      // Toggle node2 (add to selection)
+      store.toggleNodeSelection(node2Id)
+      expect(store.selectedNodeIds.size).toBe(2)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(true)
+      expect(store.selectedNodeIds.has(node2Id)).toBe(true)
+      expect(store.selectedNodeId).toBeNull() // Multiple selection clears selectedNodeId
+
+      // Toggle node1 (remove from selection)
+      store.toggleNodeSelection(node1Id)
+      expect(store.selectedNodeIds.size).toBe(1)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(false)
+      expect(store.selectedNodeIds.has(node2Id)).toBe(true)
+      expect(store.selectedNodeId).toBe(node2Id) // Single selection sets selectedNodeId
+    })
+
+    it('should remove multiple nodes at once', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+      const node3Id = store.addNode(NodeType.END, { x: 300, y: 100 })
+      store.addEdge(node1Id, node2Id)
+      store.addEdge(node2Id, node3Id)
+
+      expect(store.nodes).toHaveLength(3)
+      expect(store.edges).toHaveLength(2)
+
+      store.removeNodes([node1Id, node3Id])
+
+      expect(store.nodes).toHaveLength(1)
+      expect(store.nodes[0]!.id).toBe(node2Id)
+      expect(store.edges).toHaveLength(0) // All edges should be removed
+    })
+
+    it('should clear selectedNodeIds when removing multiple nodes', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+      const node3Id = store.addNode(NodeType.END, { x: 300, y: 100 })
+
+      store.selectNodes([node1Id, node2Id, node3Id])
+      expect(store.selectedNodeIds.size).toBe(3)
+
+      store.removeNodes([node1Id, node2Id])
+
+      // node3 should still be selected since it wasn't removed
+      expect(store.selectedNodeIds.size).toBe(1)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(false)
+      expect(store.selectedNodeIds.has(node2Id)).toBe(false)
+      expect(store.selectedNodeIds.has(node3Id)).toBe(true)
+      expect(store.selectedNodeId).toBe(node3Id) // Single selection should set selectedNodeId
+    })
+
+    it('should update selectedNodeId when removing the selected node from multiple selection', () => {
+      const store = useWorkflowStore()
+      const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
+      const node2Id = store.addNode(NodeType.TRANSFORM, { x: 200, y: 100 })
+
+      // Select node1 as single selection
+      store.selectNode(node1Id)
+      expect(store.selectedNodeId).toBe(node1Id)
+
+      // Add node2 to selection (multi-select)
+      store.toggleNodeSelection(node2Id)
+      expect(store.selectedNodeId).toBeNull() // Multi-select clears selectedNodeId
+
+      // Remove node2 (which was in selection)
+      store.removeNode(node2Id)
+
+      expect(store.selectedNodeIds.size).toBe(1)
+      expect(store.selectedNodeIds.has(node1Id)).toBe(true)
+      expect(store.selectedNodeId).toBeNull() // Still null because it was multi-select
     })
   })
 
@@ -267,6 +405,8 @@ describe('Workflow Store', () => {
 
       expect(store.nodes).toHaveLength(1)
       expect(store.nodes[0]!.id).toBe('node_1')
+      expect(store.selectedNodeId).toBeNull()
+      expect(store.selectedNodeIds.size).toBe(0)
     })
   })
 
@@ -276,12 +416,15 @@ describe('Workflow Store', () => {
       const node1Id = store.addNode(NodeType.START, { x: 100, y: 100 })
       const node2Id = store.addNode(NodeType.END, { x: 300, y: 100 })
       store.addEdge(node1Id, node2Id)
+      store.selectNodes([node1Id, node2Id])
 
       store.clearWorkflow()
 
       expect(store.nodes).toHaveLength(0)
       expect(store.edges).toHaveLength(0)
       expect(store.executionLogs).toHaveLength(0)
+      expect(store.selectedNodeId).toBeNull()
+      expect(store.selectedNodeIds.size).toBe(0)
     })
   })
 })

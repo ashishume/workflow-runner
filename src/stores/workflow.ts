@@ -150,10 +150,18 @@ export const useWorkflowStore = defineStore('workflow', () => {
     edges.value = edges.value.filter(
       (e) => !idsSet.has(e.source) && !idsSet.has(e.target)
     )
-    if (selectedNodeId.value && idsSet.has(selectedNodeId.value)) {
+    // Remove deleted nodes from selection
+    nodeIds.forEach((id) => selectedNodeIds.value.delete(id))
+    // Update selectedNodeId based on remaining selection
+    if (selectedNodeIds.value.size === 1) {
+      // If only one node is selected, set selectedNodeId
+      selectedNodeId.value = Array.from(selectedNodeIds.value)[0] ?? null
+    } else if (selectedNodeIds.value.size === 0) {
+      selectedNodeId.value = null
+    } else if (selectedNodeId.value && idsSet.has(selectedNodeId.value)) {
+      // If the selectedNodeId was removed, clear it
       selectedNodeId.value = null
     }
-    nodeIds.forEach((id) => selectedNodeIds.value.delete(id))
     saveToHistory()
   }
 
@@ -228,10 +236,11 @@ export const useWorkflowStore = defineStore('workflow', () => {
   const toggleNodeSelection = (nodeId: string) => {
     if (selectedNodeIds.value.has(nodeId)) {
       selectedNodeIds.value.delete(nodeId)
-      if (selectedNodeId.value === nodeId) {
-        selectedNodeId.value = selectedNodeIds.value.size === 1 
-          ? Array.from(selectedNodeIds.value)[0] ?? null
-          : null
+      // Update selectedNodeId based on remaining selection
+      if (selectedNodeIds.value.size === 1) {
+        selectedNodeId.value = Array.from(selectedNodeIds.value)[0] ?? null
+      } else {
+        selectedNodeId.value = null
       }
     } else {
       selectedNodeIds.value.add(nodeId)
