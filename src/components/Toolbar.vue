@@ -200,9 +200,19 @@
       }
     }
 
-    // Delete selected node
+    // Delete selected nodes
     if (event.key === 'Delete' || event.key === 'Backspace') {
-      if (store.selectedNodeId) {
+      const selectedIds = Array.from(store.selectedNodeIds)
+      if (selectedIds.length > 0) {
+        event.preventDefault()
+        store.removeNodes(selectedIds)
+        toast.info(
+          selectedIds.length === 1
+            ? 'Node deleted'
+            : `${selectedIds.length} nodes deleted`
+        )
+      } else if (store.selectedNodeId) {
+        // Fallback for backward compatibility
         event.preventDefault()
         store.removeNode(store.selectedNodeId)
         toast.info('Node deleted')

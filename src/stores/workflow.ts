@@ -58,7 +58,8 @@ export const useWorkflowStore = defineStore('workflow', () => {
   // State
   const nodes = ref<WorkflowNode[]>([])
   const edges = ref<WorkflowEdge[]>([])
-  const selectedNodeId = ref<string | null>(null)
+  const selectedNodeId = ref<string | null>(null) // Keep for backward compatibility
+  const selectedNodeIds = ref<Set<string>>(new Set())
   const viewport = ref({ x: 0, y: 0, zoom: 1 })
 
   // Computed
@@ -138,6 +139,21 @@ export const useWorkflowStore = defineStore('workflow', () => {
     if (selectedNodeId.value === nodeId) {
       selectedNodeId.value = null
     }
+    selectedNodeIds.value.delete(nodeId)
+    saveToHistory()
+  }
+
+  // Remove multiple nodes
+  const removeNodes = (nodeIds: string[]) => {
+    const idsSet = new Set(nodeIds)
+    nodes.value = nodes.value.filter((n) => !idsSet.has(n.id))
+    edges.value = edges.value.filter(
+      (e) => !idsSet.has(e.source) && !idsSet.has(e.target)
+    )
+    if (selectedNodeId.value && idsSet.has(selectedNodeId.value)) {
+      selectedNodeId.value = null
+    }
+    nodeIds.forEach((id) => selectedNodeIds.value.delete(id))
     saveToHistory()
   }
 
@@ -183,6 +199,48 @@ export const useWorkflowStore = defineStore('workflow', () => {
   // Select node
   const selectNode = (nodeId: string | null) => {
     selectedNodeId.value = nodeId
+    if (nodeId) {
+      selectedNodeIds.value.clear()
+      selectedNodeIds.value.add(nodeId)
+    } else {
+      selectedNodeIds.value.clear()
+    }
+  }
+
+  // Select multiple nodes
+  const selectNodes = (nodeIds: string[]) => {
+    selectedNodeIds.value = new Set(nodeIds)
+    if (nodeIds.length === 1) {
+      selectedNodeId.value = nodeIds[0] ?? null
+    } else {
+      selectedNodeId.value = null
+    }
+  }
+
+  // Select all nodes
+  const selectAllNodes = () => {
+    const allIds = nodes.value.map((n) => n.id)
+    selectedNodeIds.value = new Set(allIds)
+    selectedNodeId.value = null
+  }
+
+  // Toggle node selection (for multi-select with Ctrl/Cmd)
+  const toggleNodeSelection = (nodeId: string) => {
+    if (selectedNodeIds.value.has(nodeId)) {
+      selectedNodeIds.value.delete(nodeId)
+      if (selectedNodeId.value === nodeId) {
+        selectedNodeId.value = selectedNodeIds.value.size === 1 
+          ? Array.from(selectedNodeIds.value)[0] ?? null
+          : null
+      }
+    } else {
+      selectedNodeIds.value.add(nodeId)
+      if (selectedNodeIds.value.size === 1) {
+        selectedNodeId.value = nodeId
+      } else {
+        selectedNodeId.value = null
+      }
+    }
   }
 
   // Update viewport
@@ -195,6 +253,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     nodes.value = []
     edges.value = []
     selectedNodeId.value = null
+    selectedNodeIds.value.clear()
     execution.clearLogs()
     saveToHistory()
   }
@@ -222,6 +281,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
       viewport.value = state.viewport
     }
     selectedNodeId.value = null
+    selectedNodeIds.value.clear()
     execution.clearLogs()
     saveToHistory()
     return { success: true, errors: [] }
@@ -283,6 +343,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     nodes,
     edges,
     selectedNodeId,
+    selectedNodeIds,
     selectedNode,
     viewport,
 
@@ -310,9 +371,13 @@ export const useWorkflowStore = defineStore('workflow', () => {
     updateNodeConfig,
     updateNodeLabel,
     removeNode,
+    removeNodes,
     addEdge,
     removeEdge,
     selectNode,
+    selectNodes,
+    selectAllNodes,
+    toggleNodeSelection,
     updateViewport,
     clearWorkflow,
     exportWorkflow,

@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { computed, markRaw, ref } from 'vue'
 
+  import { useEventListener } from '@vueuse/core'
+
   import { Background } from '@vue-flow/background'
   import { Controls } from '@vue-flow/controls'
   import { MarkerType, VueFlow, useVueFlow } from '@vue-flow/core'
@@ -37,7 +39,7 @@
       type: node.type,
       position: node.position,
       data: node.data,
-      selected: store.selectedNodeId === node.id,
+      selected: store.selectedNodeIds.has(node.id),
     }))
   )
 
@@ -73,8 +75,27 @@
   // Handle node changes (selection, removal)
   onNodesChange((changes) => {
     changes.forEach((change) => {
-      if (change.type === 'select' && change.selected) {
-        store.selectNode(change.id)
+      if (change.type === 'select') {
+        // Sync Vue Flow's selection state with our store
+        if (change.selected) {
+          // Add to selection (multi-select is handled by Vue Flow)
+          if (!store.selectedNodeIds.has(change.id)) {
+            store.selectedNodeIds.add(change.id)
+            // Update selectedNodeId if this is the first/only selection
+            if (store.selectedNodeIds.size === 1) {
+              store.selectedNodeId = change.id
+            } else {
+              store.selectedNodeId = null
+            }
+          }
+        } else {
+          // Remove from selection
+          store.selectedNodeIds.delete(change.id)
+          if (store.selectedNodeId === change.id) {
+            const remaining = Array.from(store.selectedNodeIds)
+            store.selectedNodeId = remaining.length === 1 ? remaining[0] ?? null : null
+          }
+        }
       } else if (change.type === 'remove') {
         store.removeNode(change.id)
       }
@@ -155,14 +176,43 @@
   }
 
   // Node click handler
-  const onNodeClick = ({ node }: { node: { id: string } }) => {
-    store.selectNode(node.id)
+  const onNodeClick = (nodeMouseEvent: { node: { id: string }; event: MouseEvent | TouchEvent }) => {
+    const { node, event } = nodeMouseEvent
+    // Handle multi-select with Ctrl/Cmd (only for mouse events)
+    if (event instanceof MouseEvent && (event.ctrlKey || event.metaKey)) {
+      // Multi-select: toggle this node
+      store.toggleNodeSelection(node.id)
+    } else {
+      // Single select: select only this node
+      store.selectNode(node.id)
+    }
   }
 
   // MiniMap node color - using centralized config
   const nodeColor = (node: { type?: string }) => {
     return getNodeColor(node.type ?? '')
   }
+
+  // Handle keyboard shortcuts
+  const handleKeydown = (event: KeyboardEvent) => {
+    // Don't trigger shortcuts when typing in inputs
+    const target = event.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return
+    }
+
+    // Select all nodes (Cmd+A / Ctrl+A)
+    if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
+      event.preventDefault()
+      if (store.nodes.length > 0) {
+        store.selectAllNodes()
+        toast.info(`Selected ${store.nodes.length} node${store.nodes.length === 1 ? '' : 's'}`)
+      }
+    }
+  }
+
+  // Use vueuse's useEventListener for automatic cleanup
+  useEventListener(window, 'keydown', handleKeydown)
 </script>
 
 <template>
