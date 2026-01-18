@@ -76,19 +76,8 @@ export function getNodeColor(nodeType: NodeType | string): string {
   return NODE_COLORS[type]?.primary ?? '#94a3b8'
 }
 
-// Helper function to get node background by type
-export function getNodeBackground(nodeType: NodeType | string): string {
-  const type = nodeType as NodeType
-  return NODE_COLORS[type]?.background ?? 'rgba(148, 163, 184, 0.2)'
-}
-
 // Helper function to get node label by type
 export function getNodeLabel(type: NodeType): string {
   const config = NODE_TYPE_CONFIGS.find((c) => c.type === type)
   return config?.label ?? 'Node'
-}
-
-// Helper function to get node config by type
-export function getNodeConfig(type: NodeType): NodeTypeConfig | undefined {
-  return NODE_TYPE_CONFIGS.find((c) => c.type === type)
 }
