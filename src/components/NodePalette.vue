@@ -1,7 +1,15 @@
 <script setup lang="ts">
   import { ref } from 'vue'
 
-  import { BranchIcon, DragIcon, PlayIcon, StopIcon, TransformIcon } from '../assets/icons'
+  import {
+    BranchIcon,
+    ChevronUpIcon,
+    CloseIcon,
+    DragIcon,
+    PlayIcon,
+    StopIcon,
+    TransformIcon,
+  } from '../assets/icons'
   import type { NodeType } from '../types/workflow'
   import { NODE_TYPE_CONFIGS } from '../utils/nodeConfig'
 
@@ -13,6 +21,11 @@
   const nodes = NODE_TYPE_CONFIGS
 
   const draggedNode = ref<NodeType | null>(null)
+  const isOpen = ref(true)
+
+  const togglePalette = () => {
+    isOpen.value = !isOpen.value
+  }
 
   const onDragStart = (event: DragEvent, nodeType: NodeType) => {
     if (event.dataTransfer) {
@@ -29,40 +42,52 @@
 </script>
 
 <template>
-  <div class="node-palette">
-    <div class="palette-header">
-      <h2>Nodes</h2>
-      <p class="palette-hint">Drag to canvas</p>
-    </div>
-
-    <div class="nodes-list">
-      <div
-        v-for="node in nodes"
-        :key="node.type"
-        class="node-item"
-        :class="{ dragging: draggedNode === node.type }"
-        :style="{ '--node-color': node.colors.primary }"
-        draggable="true"
-        @dragstart="onDragStart($event, node.type)"
-        @dragend="onDragEnd"
-      >
-        <div class="node-icon">
-          <PlayIcon v-if="node.icon === 'play'" :size="20" />
-          <TransformIcon v-if="node.icon === 'transform'" :size="20" />
-          <BranchIcon v-if="node.icon === 'branch'" :size="20" />
-          <StopIcon v-if="node.icon === 'stop'" :size="20" />
+  <div class="node-palette" :class="{ collapsed: !isOpen }">
+    <div v-if="isOpen" class="palette-content">
+      <div class="palette-header">
+        <div class="header-content">
+          <h2>Nodes</h2>
+          <p class="palette-hint">Drag to canvas</p>
         </div>
+        <button class="close-btn" @click="togglePalette" title="Close palette">
+          <CloseIcon :size="18" />
+        </button>
+      </div>
 
-        <div class="node-info">
-          <span class="node-label">{{ node.label }}</span>
-          <span class="node-description">{{ node.description }}</span>
-        </div>
+      <div class="nodes-list">
+        <div
+          v-for="node in nodes"
+          :key="node.type"
+          class="node-item"
+          :class="{ dragging: draggedNode === node.type }"
+          :style="{ '--node-color': node.colors.primary }"
+          draggable="true"
+          @dragstart="onDragStart($event, node.type)"
+          @dragend="onDragEnd"
+        >
+          <div class="node-icon">
+            <PlayIcon v-if="node.icon === 'play'" :size="20" />
+            <TransformIcon v-if="node.icon === 'transform'" :size="20" />
+            <BranchIcon v-if="node.icon === 'branch'" :size="20" />
+            <StopIcon v-if="node.icon === 'stop'" :size="20" />
+          </div>
 
-        <div class="drag-indicator">
-          <DragIcon :size="16" />
+          <div class="node-info">
+            <span class="node-label">{{ node.label }}</span>
+            <span class="node-description">{{ node.description }}</span>
+          </div>
+
+          <div class="drag-indicator">
+            <DragIcon :size="16" />
+          </div>
         </div>
       </div>
     </div>
+
+    <button v-else class="reopen-btn" @click="togglePalette" title="Open palette">
+      <ChevronUpIcon class="chevron-icon" :size="20" />
+      <span>Nodes</span>
+    </button>
   </div>
 </template>
 
@@ -74,11 +99,31 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: width 0.3s ease;
+
+    &.collapsed {
+      width: 60px;
+    }
+  }
+
+  .palette-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
   }
 
   .palette-header {
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    .header-content {
+      flex: 1;
+    }
 
     h2 {
       margin: 0;
@@ -89,10 +134,67 @@
     }
   }
 
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+  }
+
   .palette-hint {
     margin: 4px 0 0;
     font-size: 12px;
     color: var(--text-tertiary);
+  }
+
+  .reopen-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    padding: 16px 8px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+
+    &:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .chevron-icon {
+      transform: rotate(-90deg);
+      writing-mode: initial;
+      text-orientation: initial;
+    }
+
+    span {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
   }
 
   .nodes-list {
