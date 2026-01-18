@@ -41,6 +41,81 @@
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
 
+  // Status Colors
+  --status-success: #4ade80;
+  --status-success-bg: rgba(74, 222, 128, 0.2);
+  --status-success-border: #2d8a4e;
+  --status-success-light: rgba(74, 222, 128, 0.1);
+  --status-success-lighter: rgba(74, 222, 128, 0.05);
+  --status-error: #f87171;
+  --status-error-bg: rgba(248, 113, 113, 0.2);
+  --status-error-border: #dc2626;
+  --status-error-light: rgba(248, 113, 113, 0.1);
+  --status-error-lighter: rgba(248, 113, 113, 0.05);
+  --status-warning: #fbbf24;
+  --status-warning-bg: rgba(251, 191, 36, 0.2);
+  --status-warning-border: #d97706;
+  --status-warning-light: rgba(251, 191, 36, 0.1);
+  --status-info: #60a5fa;
+  --status-info-bg: rgba(96, 165, 250, 0.2);
+  --status-info-light: rgba(96, 165, 250, 0.1);
+
+  // Node Type Colors
+  --node-start-primary: #4ade80;
+  --node-start-bg: rgba(74, 222, 128, 0.2);
+  --node-start-border: #2d8a4e;
+  --node-start-gradient-start: #1a472a;
+  --node-start-gradient-end: #0d3320;
+  --node-start-icon-bg: rgba(45, 138, 78, 0.5);
+
+  --node-transform-primary: #a78bfa;
+  --node-transform-bg: rgba(167, 139, 250, 0.2);
+  --node-transform-border: #7c3aed;
+  --node-transform-gradient-start: #2d1b4e;
+  --node-transform-gradient-end: #1a0f30;
+  --node-transform-icon-bg: rgba(124, 58, 237, 0.5);
+
+  --node-condition-primary: #fbbf24;
+  --node-condition-bg: rgba(251, 191, 36, 0.2);
+  --node-condition-border: #d97706;
+  --node-condition-gradient-start: #4a3728;
+  --node-condition-gradient-end: #2d1f16;
+  --node-condition-icon-bg: rgba(245, 158, 11, 0.5);
+
+  --node-end-primary: #f87171;
+  --node-end-bg: rgba(248, 113, 113, 0.2);
+  --node-end-border: #dc2626;
+  --node-end-gradient-start: #4a1c2e;
+  --node-end-gradient-end: #2d101b;
+  --node-end-icon-bg: rgba(220, 38, 38, 0.5);
+
+  // Toast Colors
+  --toast-success-bg: rgba(74, 222, 128, 0.95);
+  --toast-success-color: #000;
+  --toast-error-bg: rgba(248, 113, 113, 0.95);
+  --toast-error-color: #fff;
+  --toast-warning-bg: rgba(251, 191, 36, 0.95);
+  --toast-warning-color: #000;
+  --toast-info-bg: rgba(96, 165, 250, 0.95);
+  --toast-info-color: #fff;
+
+  // Connection/Edge Colors
+  --connection-color: var(--accent-color);
+  --connection-glow: rgba(0, 212, 255, 0.3);
+  --connection-glow-light: rgba(0, 212, 255, 0.1);
+
+  // Overlay Colors
+  --overlay-dark: rgba(0, 0, 0, 0.7);
+  --overlay-darker: rgba(0, 0, 0, 0.3);
+  --overlay-darkest: rgba(0, 0, 0, 0.2);
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --overlay-lighter: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+
+  // Text on Colored Backgrounds
+  --text-on-dark: #fff;
+  --text-on-light: #000;
+
   // Light Mode
   &.light-mode {
     --accent-color: #0091b3;
@@ -64,6 +139,81 @@
     --text-tertiary: #8a8a9a;
 
     --grid-color: rgba(0, 0, 0, 0.04);
+
+    // Status Colors (light mode - same values, but may need adjustment)
+    --status-success: #4ade80;
+    --status-success-bg: rgba(74, 222, 128, 0.2);
+    --status-success-border: #2d8a4e;
+    --status-success-light: rgba(74, 222, 128, 0.1);
+    --status-success-lighter: rgba(74, 222, 128, 0.05);
+    --status-error: #f87171;
+    --status-error-bg: rgba(248, 113, 113, 0.2);
+    --status-error-border: #dc2626;
+    --status-error-light: rgba(248, 113, 113, 0.1);
+    --status-error-lighter: rgba(248, 113, 113, 0.05);
+    --status-warning: #fbbf24;
+    --status-warning-bg: rgba(251, 191, 36, 0.2);
+    --status-warning-border: #d97706;
+    --status-warning-light: rgba(251, 191, 36, 0.1);
+    --status-info: #60a5fa;
+    --status-info-bg: rgba(96, 165, 250, 0.2);
+    --status-info-light: rgba(96, 165, 250, 0.1);
+
+    // Node Type Colors (light mode - same values)
+    --node-start-primary: #4ade80;
+    --node-start-bg: rgba(74, 222, 128, 0.2);
+    --node-start-border: #2d8a4e;
+    --node-start-gradient-start: #1a472a;
+    --node-start-gradient-end: #0d3320;
+    --node-start-icon-bg: rgba(45, 138, 78, 0.5);
+
+    --node-transform-primary: #a78bfa;
+    --node-transform-bg: rgba(167, 139, 250, 0.2);
+    --node-transform-border: #7c3aed;
+    --node-transform-gradient-start: #2d1b4e;
+    --node-transform-gradient-end: #1a0f30;
+    --node-transform-icon-bg: rgba(124, 58, 237, 0.5);
+
+    --node-condition-primary: #fbbf24;
+    --node-condition-bg: rgba(251, 191, 36, 0.2);
+    --node-condition-border: #d97706;
+    --node-condition-gradient-start: #4a3728;
+    --node-condition-gradient-end: #2d1f16;
+    --node-condition-icon-bg: rgba(245, 158, 11, 0.5);
+
+    --node-end-primary: #f87171;
+    --node-end-bg: rgba(248, 113, 113, 0.2);
+    --node-end-border: #dc2626;
+    --node-end-gradient-start: #4a1c2e;
+    --node-end-gradient-end: #2d101b;
+    --node-end-icon-bg: rgba(220, 38, 38, 0.5);
+
+    // Toast Colors (light mode - same values)
+    --toast-success-bg: rgba(74, 222, 128, 0.95);
+    --toast-success-color: #000;
+    --toast-error-bg: rgba(248, 113, 113, 0.95);
+    --toast-error-color: #fff;
+    --toast-warning-bg: rgba(251, 191, 36, 0.95);
+    --toast-warning-color: #000;
+    --toast-info-bg: rgba(96, 165, 250, 0.95);
+    --toast-info-color: #fff;
+
+    // Connection/Edge Colors (light mode)
+    --connection-color: var(--accent-color);
+    --connection-glow: rgba(0, 145, 179, 0.3);
+    --connection-glow-light: rgba(0, 145, 179, 0.1);
+
+    // Overlay Colors (light mode)
+    --overlay-dark: rgba(0, 0, 0, 0.7);
+    --overlay-darker: rgba(0, 0, 0, 0.3);
+    --overlay-darkest: rgba(0, 0, 0, 0.2);
+    --overlay-light: rgba(0, 0, 0, 0.1);
+    --overlay-lighter: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+
+    // Text on Colored Backgrounds
+    --text-on-dark: #fff;
+    --text-on-light: #000;
   }
 }
 
@@ -126,7 +276,7 @@ body {
 // ============================================
 ::selection {
   background: var(--accent-color);
-  color: #000;
+  color: var(--text-on-light);
 }
 
 :focus-visible {
@@ -243,13 +393,12 @@ h6 {
 // Glass Effect
 // ============================================
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--overlay-light);
 
   .light-mode & {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
   }
 }
 
@@ -257,30 +406,30 @@ h6 {
 // Status Colors
 // ============================================
 .status-success {
-  color: #4ade80;
+  color: var(--status-success);
 }
 .status-error {
-  color: #f87171;
+  color: var(--status-error);
 }
 .status-warning {
-  color: #fbbf24;
+  color: var(--status-warning);
 }
 .status-info {
-  color: #60a5fa;
+  color: var(--status-info);
 }
 
 // ============================================
 // Node Type Colors
 // ============================================
 .node-start {
-  --node-color: #4ade80;
+  --node-color: var(--node-start-primary);
 }
 .node-transform {
-  --node-color: #a78bfa;
+  --node-color: var(--node-transform-primary);
 }
 .node-condition {
-  --node-color: #fbbf24;
+  --node-color: var(--node-condition-primary);
 }
 .node-end {
-  --node-color: #f87171;
+  --node-color: var(--node-end-primary);
 }

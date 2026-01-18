@@ -15,6 +15,7 @@ export interface NodeTypeConfig {
 }
 
 // Centralized node color configuration
+// Note: These values should match the CSS variables defined in style.scss
 export const NODE_COLORS: Record<NodeType, NodeColorConfig> = {
   [NodeType.START]: {
     primary: '#4ade80',
@@ -71,6 +72,7 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
 ]
 
 // Helper function to get node color by type
+// Note: Returns hex color for TypeScript usage. For CSS, use CSS variables instead.
 export function getNodeColor(nodeType: NodeType | string): string {
   const type = nodeType as NodeType
   return NODE_COLORS[type]?.primary ?? '#94a3b8'

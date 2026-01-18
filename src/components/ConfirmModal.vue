@@ -67,7 +67,7 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--overlay-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,7 +83,7 @@
     max-width: 400px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-lg);
     animation: scaleIn 0.2s ease;
   }
 
@@ -165,7 +165,7 @@
     &.primary {
       background: var(--accent-color);
       border: none;
-      color: #000;
+      color: var(--text-on-light);
 
       &:hover {
         background: color-mix(in srgb, var(--accent-color) 80%, white);
@@ -173,12 +173,12 @@
     }
 
     &.danger {
-      background: #f87171;
+      background: var(--status-error);
       border: none;
-      color: #fff;
+      color: var(--text-on-dark);
 
       &:hover {
-        background: #ef4444;
+        background: var(--status-error-border);
       }
     }
 

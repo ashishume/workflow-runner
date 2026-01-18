@@ -49,10 +49,10 @@
       sourceHandle: edge.sourceHandle,
       targetHandle: edge.targetHandle,
       animated: edge.animated,
-      style: { stroke: '#00d4ff', strokeWidth: 2 },
+      style: { stroke: 'var(--connection-color)', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: '#00d4ff',
+        color: 'var(--connection-color)',
       },
     }))
   )
@@ -182,7 +182,7 @@
       :max-zoom="2"
       :snap-to-grid="true"
       :snap-grid="[20, 20]"
-      :connection-line-style="{ stroke: '#00d4ff', strokeWidth: 2 }"
+      :connection-line-style="{ stroke: 'var(--connection-color)', strokeWidth: 2 }"
       :default-edge-options="{ animated: true }"
       fit-view-on-init
       @move-end="onMoveEnd"
@@ -237,7 +237,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 212, 255, 0.05);
+    background: var(--connection-glow-light);
     border: 2px dashed var(--accent-color);
     pointer-events: none;
     z-index: 100;
@@ -320,7 +320,7 @@
       border: 1px solid var(--border-color) !important;
       border-radius: 8px !important;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+      box-shadow: var(--shadow-md) !important;
     }
 
     &__controls-button {
@@ -349,7 +349,7 @@
     }
 
     &__edge.selected &__edge-path {
-      stroke: #fff !important;
+      stroke: var(--text-on-dark) !important;
     }
 
     &__arrowhead polyline {

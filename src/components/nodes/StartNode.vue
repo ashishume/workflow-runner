@@ -43,27 +43,31 @@
 
 <style scoped lang="scss">
   .node {
-    background: var(--node-bg, #1a1a2e);
-    border: 2px solid var(--node-border, #16213e);
+    background: var(--node-bg, var(--card-bg));
+    border: 2px solid var(--node-border, var(--border-color));
     border-radius: 12px;
     min-width: 180px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
     transition: all 0.2s ease;
 
     &:hover {
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-lg);
       transform: translateY(-2px);
     }
 
     &.selected {
-      border-color: var(--accent-color, #00d4ff);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 20px var(--connection-glow);
     }
   }
 
   .start-node {
-    --node-bg: linear-gradient(135deg, #1a472a 0%, #0d3320 100%);
-    --node-border: #2d8a4e;
+    --node-bg: linear-gradient(
+      135deg,
+      var(--node-start-gradient-start) 0%,
+      var(--node-start-gradient-end) 100%
+    );
+    --node-border: var(--node-start-border);
     background: var(--node-bg);
   }
 
@@ -72,7 +76,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--overlay-light);
   }
 
   .node-icon {
@@ -81,14 +85,14 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: rgba(45, 138, 78, 0.5);
+    background: var(--node-start-icon-bg);
     border-radius: 6px;
-    color: #4ade80;
+    color: var(--node-start-primary);
   }
 
   .node-title {
     font-weight: 600;
-    color: #fff;
+    color: var(--text-on-dark);
     font-size: 13px;
     letter-spacing: 0.3px;
   }
@@ -99,9 +103,9 @@
 
   .payload-preview {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     font-family: 'Monaco', 'Consolas', monospace;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--overlay-darkest);
     padding: 6px 8px;
     border-radius: 4px;
     word-break: break-all;
@@ -110,8 +114,8 @@
   .handle {
     width: 12px;
     height: 12px;
-    background: #4ade80;
-    border: 2px solid #fff;
+    background: var(--node-start-primary);
+    border: 2px solid var(--text-on-dark);
     border-radius: 50%;
   }
 

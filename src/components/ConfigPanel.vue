@@ -340,23 +340,23 @@
     letter-spacing: 0.5px;
 
     &.start {
-      background: rgba(74, 222, 128, 0.2);
-      color: #4ade80;
+      background: var(--node-start-bg);
+      color: var(--node-start-primary);
     }
 
     &.transform {
-      background: rgba(167, 139, 250, 0.2);
-      color: #a78bfa;
+      background: var(--node-transform-bg);
+      color: var(--node-transform-primary);
     }
 
     &.condition {
-      background: rgba(251, 191, 36, 0.2);
-      color: #fbbf24;
+      background: var(--node-condition-bg);
+      color: var(--node-condition-primary);
     }
 
     &.end {
-      background: rgba(248, 113, 113, 0.2);
-      color: #f87171;
+      background: var(--node-end-bg);
+      color: var(--node-end-primary);
     }
   }
 
@@ -416,7 +416,7 @@
       &:focus {
         outline: none;
         border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        box-shadow: 0 0 0 3px var(--connection-glow-light);
       }
 
       &::placeholder {
@@ -433,7 +433,7 @@
 
   .error-text {
     font-size: 11px;
-    color: #f87171;
+    color: var(--status-error);
   }
 
   .hint-text {
@@ -466,11 +466,11 @@
   }
 
   .true-branch .indicator {
-    background: #4ade80;
+    background: var(--status-success);
   }
 
   .false-branch .indicator {
-    background: #f87171;
+    background: var(--status-error);
   }
 
   .end-info {
@@ -483,7 +483,7 @@
 
     svg {
       margin-bottom: 16px;
-      color: #f87171;
+      color: var(--status-error);
     }
 
     p {
@@ -511,18 +511,18 @@
     gap: 8px;
     width: 100%;
     padding: 10px;
-    background: rgba(248, 113, 113, 0.1);
-    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: var(--status-error-light);
+    border: 1px solid var(--status-error-bg);
     border-radius: 8px;
-    color: #f87171;
+    color: var(--status-error);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-      background: rgba(248, 113, 113, 0.2);
-      border-color: #f87171;
+      background: var(--status-error-bg);
+      border-color: var(--status-error);
     }
   }
 </style>

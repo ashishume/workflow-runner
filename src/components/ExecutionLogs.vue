@@ -150,7 +150,7 @@
     font-weight: 600;
     padding: 2px 8px;
     background: var(--accent-color);
-    color: #000;
+    color: var(--text-on-light);
     border-radius: 10px;
   }
 
@@ -159,14 +159,14 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    color: #4ade80;
+    color: var(--status-success);
     font-weight: 500;
   }
 
   .pulse {
     width: 8px;
     height: 8px;
-    background: #4ade80;
+    background: var(--status-success);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
   }
@@ -257,8 +257,8 @@
     gap: 12px;
 
     &.error .log-message {
-      background: rgba(248, 113, 113, 0.1);
-      color: #f87171;
+      background: var(--status-error-light);
+      color: var(--status-error);
     }
   }
 

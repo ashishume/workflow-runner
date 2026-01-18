@@ -82,27 +82,31 @@
 
 <style scoped lang="scss">
   .node {
-    background: var(--node-bg, #1a1a2e);
-    border: 2px solid var(--node-border, #16213e);
+    background: var(--node-bg, var(--card-bg));
+    border: 2px solid var(--node-border, var(--border-color));
     border-radius: 12px;
     min-width: 200px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
     transition: all 0.2s ease;
 
     &:hover {
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-lg);
       transform: translateY(-2px);
     }
 
     &.selected {
-      border-color: var(--accent-color, #00d4ff);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 20px var(--connection-glow);
     }
   }
 
   .condition-node {
-    --node-bg: linear-gradient(135deg, #4a3728 0%, #2d1f16 100%);
-    --node-border: #f59e0b;
+    --node-bg: linear-gradient(
+      135deg,
+      var(--node-condition-gradient-start) 0%,
+      var(--node-condition-gradient-end) 100%
+    );
+    --node-border: var(--node-condition-border);
     background: var(--node-bg);
   }
 
@@ -111,7 +115,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--overlay-light);
   }
 
   .node-icon {
@@ -120,14 +124,14 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: rgba(245, 158, 11, 0.5);
+    background: var(--node-condition-icon-bg);
     border-radius: 6px;
-    color: #fbbf24;
+    color: var(--node-condition-primary);
   }
 
   .node-title {
     font-weight: 600;
-    color: #fff;
+    color: var(--text-on-dark);
     font-size: 13px;
     letter-spacing: 0.3px;
   }
@@ -138,9 +142,9 @@
 
   .condition-preview {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     font-family: 'Monaco', 'Consolas', monospace;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--overlay-darkest);
     padding: 6px 8px;
     border-radius: 4px;
   }
@@ -168,17 +172,17 @@
   }
 
   .true-handle .handle-label {
-    color: #4ade80;
+    color: var(--status-success);
   }
 
   .false-handle .handle-label {
-    color: #f87171;
+    color: var(--status-error);
   }
 
   .handle {
     width: 12px;
     height: 12px;
-    border: 2px solid #fff;
+    border: 2px solid var(--text-on-dark);
     border-radius: 50%;
     position: relative !important;
     transform: none !important;
@@ -188,17 +192,17 @@
 
   .handle-target {
     left: -6px;
-    background: #fbbf24;
+    background: var(--node-condition-primary);
     position: absolute !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
   }
 
   .handle-true {
-    background: #4ade80;
+    background: var(--status-success);
   }
 
   .handle-false {
-    background: #f87171;
+    background: var(--status-error);
   }
 </style>

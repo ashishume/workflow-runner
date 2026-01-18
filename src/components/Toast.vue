@@ -24,24 +24,24 @@
     switch (props.type) {
       case 'success':
         return {
-          bg: 'rgba(74, 222, 128, 0.95)',
-          color: '#000',
+          bg: 'var(--toast-success-bg)',
+          color: 'var(--toast-success-color)',
         }
       case 'error':
         return {
-          bg: 'rgba(248, 113, 113, 0.95)',
-          color: '#fff',
+          bg: 'var(--toast-error-bg)',
+          color: 'var(--toast-error-color)',
         }
       case 'warning':
         return {
-          bg: 'rgba(251, 191, 36, 0.95)',
-          color: '#000',
+          bg: 'var(--toast-warning-bg)',
+          color: 'var(--toast-warning-color)',
         }
       case 'info':
       default:
         return {
-          bg: 'rgba(96, 165, 250, 0.95)',
-          color: '#fff',
+          bg: 'var(--toast-info-bg)',
+          color: 'var(--toast-info-color)',
         }
     }
   })
@@ -79,7 +79,7 @@
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
     cursor: pointer;
     max-width: 400px;
   }
@@ -94,7 +94,7 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--overlay-darkest);
     border: none;
     border-radius: 4px;
     color: inherit;
@@ -102,7 +102,7 @@
     transition: background 0.2s ease;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--overlay-darker);
     }
   }
 </style>

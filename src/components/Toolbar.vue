@@ -424,10 +424,10 @@
     gap: 6px;
     margin-left: 16px;
     padding: 4px 10px;
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    background: var(--status-success-light);
+    border: 1px solid var(--status-success-bg);
     border-radius: 6px;
-    color: #4ade80;
+    color: var(--status-success);
     font-size: 11px;
     font-weight: 500;
   }
@@ -482,7 +482,7 @@
     &.run-btn {
       background: var(--accent-color);
       border-color: var(--accent-color);
-      color: #000;
+      color: var(--text-on-light);
       font-weight: 600;
 
       &:hover:not(:disabled) {
@@ -491,9 +491,9 @@
     }
 
     &.danger:hover:not(:disabled) {
-      background: rgba(248, 113, 113, 0.1);
-      border-color: rgba(248, 113, 113, 0.3);
-      color: #f87171;
+      background: var(--status-error-light);
+      border-color: var(--status-error-bg);
+      color: var(--status-error);
     }
   }
 
@@ -508,7 +508,7 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--overlay-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -525,7 +525,7 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-lg);
   }
 
   .modal-header {
@@ -634,7 +634,7 @@
     display: block;
     margin-top: 8px;
     font-size: 12px;
-    color: #f87171;
+    color: var(--status-error);
     white-space: pre-wrap;
   }
 
@@ -660,7 +660,7 @@
     &.primary {
       background: var(--accent-color);
       border: none;
-      color: #000;
+      color: var(--text-on-light);
 
       &:hover:not(:disabled) {
         background: color-mix(in srgb, var(--accent-color) 80%, white);
