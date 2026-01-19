@@ -61,6 +61,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
   const selectedNodeId = ref<string | null>(null) // Keep for backward compatibility
   const selectedNodeIds = ref<Set<string>>(new Set())
   const viewport = ref({ x: 0, y: 0, zoom: 1 })
+  const clipboard = ref<{ nodes: WorkflowNode[]; edges: WorkflowEdge[] } | null>(null)
 
   // Computed
   const selectedNode = computed(
@@ -396,7 +397,102 @@ export const useWorkflowStore = defineStore('workflow', () => {
     loadAutoSave,
     getWorkflowValidation,
 
-    // Expose persistence methods for toolbar
-    downloadWorkflow: persistence.downloadAsFile,
+  // Expose persistence methods for toolbar
+  downloadWorkflow: persistence.downloadAsFile,
+
+  // Copy/Paste
+  clipboard,
+  copyNodes: () => {
+    const selectedIds = Array.from(selectedNodeIds.value)
+    if (selectedIds.length === 0 && selectedNodeId.value) {
+      selectedIds.push(selectedNodeId.value)
+    }
+    if (selectedIds.length === 0) return false
+
+    // Get selected nodes
+    const nodesToCopy = nodes.value.filter((n) => selectedIds.includes(n.id))
+    if (nodesToCopy.length === 0) return false
+
+    // Get edges between selected nodes only
+    const edgesToCopy = edges.value.filter(
+      (e) => selectedIds.includes(e.source) && selectedIds.includes(e.target)
+    )
+
+    // Deep clone nodes and edges
+    clipboard.value = {
+      nodes: JSON.parse(JSON.stringify(toRaw(nodesToCopy))),
+      edges: JSON.parse(JSON.stringify(toRaw(edgesToCopy))),
+    }
+
+    return true
+  },
+  pasteNodes: (offset: { x: number; y: number } = { x: 50, y: 50 }) => {
+    if (!clipboard.value || clipboard.value.nodes.length === 0) return false
+
+    // Create mapping from old IDs to new IDs
+    const idMap = new Map<string, string>()
+    const newNodes: WorkflowNode[] = []
+    const newEdges: WorkflowEdge[] = []
+
+    // Calculate center of copied nodes
+    const centerX =
+      clipboard.value.nodes.reduce((sum, n) => sum + n.position.x, 0) /
+      clipboard.value.nodes.length
+    const centerY =
+      clipboard.value.nodes.reduce((sum, n) => sum + n.position.y, 0) /
+      clipboard.value.nodes.length
+
+    // Calculate paste position (viewport center with offset)
+    // Viewport center in canvas coordinates
+    const viewportCenterX = -viewport.value.x / viewport.value.zoom
+    const viewportCenterY = -viewport.value.y / viewport.value.zoom
+
+    // Create new nodes with new IDs and offset positions
+    clipboard.value.nodes.forEach((node) => {
+      const newId = generateId()
+      idMap.set(node.id, newId)
+
+      // Position relative to viewport center with offset
+      const newPosition = {
+        x: viewportCenterX + (node.position.x - centerX) + offset.x,
+        y: viewportCenterY + (node.position.y - centerY) + offset.y,
+      }
+
+      newNodes.push({
+        ...node,
+        id: newId,
+        position: newPosition,
+      })
+    })
+
+    // Create new edges with updated source/target IDs
+    clipboard.value.edges.forEach((edge) => {
+      const newSourceId = idMap.get(edge.source)
+      const newTargetId = idMap.get(edge.target)
+      if (newSourceId && newTargetId) {
+        newEdges.push({
+          ...edge,
+          id: `edge_${newSourceId}_${newTargetId}`,
+          source: newSourceId,
+          target: newTargetId,
+        })
+      }
+    })
+
+    // Add new nodes and edges
+    nodes.value.push(...newNodes)
+    edges.value.push(...newEdges)
+
+    // Select the newly pasted nodes
+    selectedNodeIds.value = new Set(newNodes.map((n) => n.id))
+    if (newNodes.length === 1) {
+      selectedNodeId.value = newNodes[0]?.id ?? null
+    } else {
+      selectedNodeId.value = null
+    }
+
+    saveToHistory()
+    return true
+  },
   }
 })

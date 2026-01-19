@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
+  import { computed, defineAsyncComponent, ref } from 'vue'
 
   import { useEventListener } from '@vueuse/core'
 
@@ -22,7 +22,10 @@
   import { useToast } from '../composables/useToast'
   import { useWorkflowStore } from '../stores/workflow'
   import type { WorkflowState } from '../types/workflow'
-  import ConfirmModal from './ConfirmModal.vue'
+
+  // Lazy load modals
+  const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal.vue'))
+  const KeyboardShortcutsHelp = defineAsyncComponent(() => import('./KeyboardShortcutsHelp.vue'))
 
   const store = useWorkflowStore()
   const toast = useToast()
@@ -30,6 +33,7 @@
   const isExportModalOpen = ref(false)
   const isImportModalOpen = ref(false)
   const isConfirmClearOpen = ref(false)
+  const isShortcutsHelpOpen = ref(false)
   const exportedJson = ref('')
   const importJson = ref('')
   const importError = ref('')
@@ -228,6 +232,13 @@
       if (isExportModalOpen.value) closeExportModal()
       if (isImportModalOpen.value) closeImportModal()
       if (isConfirmClearOpen.value) cancelClear()
+      if (isShortcutsHelpOpen.value) isShortcutsHelpOpen.value = false
+    }
+
+    // Keyboard shortcuts help (Ctrl+? or Ctrl+Shift+/)
+    if ((event.metaKey || event.ctrlKey) && (event.key === '?' || (event.shiftKey && event.key === '/'))) {
+      event.preventDefault()
+      isShortcutsHelpOpen.value = !isShortcutsHelpOpen.value
     }
   }
 
@@ -305,6 +316,13 @@
     <div class="toolbar-right">
       <button
         class="toolbar-btn icon-only"
+        @click="isShortcutsHelpOpen = true"
+        title="Keyboard Shortcuts (Ctrl+?)"
+      >
+        <span style="font-size: 16px; font-weight: 600">?</span>
+      </button>
+      <button
+        class="toolbar-btn icon-only"
         @click="toggleDarkMode"
         :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
       >
@@ -315,15 +333,22 @@
   </div>
 
   <!-- Confirm Clear Modal -->
-  <ConfirmModal
-    v-if="isConfirmClearOpen"
-    title="Clear Workflow"
-    message="Are you sure you want to clear the workflow? This action cannot be undone."
-    confirm-text="Clear"
-    confirm-variant="danger"
-    @confirm="confirmClear"
-    @cancel="cancelClear"
-  />
+  <Suspense>
+    <ConfirmModal
+      v-if="isConfirmClearOpen"
+      title="Clear Workflow"
+      message="Are you sure you want to clear the workflow? This action cannot be undone."
+      confirm-text="Clear"
+      confirm-variant="danger"
+      @confirm="confirmClear"
+      @cancel="cancelClear"
+    />
+  </Suspense>
+
+  <!-- Keyboard Shortcuts Help Modal -->
+  <Suspense>
+    <KeyboardShortcutsHelp v-if="isShortcutsHelpOpen" @close="isShortcutsHelpOpen = false" />
+  </Suspense>
 
   <!-- Export Modal -->
   <Teleport to="body">
@@ -405,7 +430,9 @@
   .toolbar-left,
   .toolbar-right {
     display: flex;
+    gap: 8px;
     align-items: center;
+    justify-content: center;
   }
 
   .toolbar-center {

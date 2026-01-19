@@ -201,6 +201,30 @@
       return
     }
 
+    // Copy nodes (Ctrl+C / Cmd+C)
+    if ((event.metaKey || event.ctrlKey) && event.key === 'c') {
+      event.preventDefault()
+      const copied = store.copyNodes()
+      if (copied) {
+        const count = Array.from(store.selectedNodeIds).length || (store.selectedNodeId ? 1 : 0)
+        toast.success(`Copied ${count} node${count === 1 ? '' : 's'}`)
+      }
+      return
+    }
+
+    // Paste nodes (Ctrl+V / Cmd+V)
+    if ((event.metaKey || event.ctrlKey) && event.key === 'v') {
+      event.preventDefault()
+      const pasted = store.pasteNodes()
+      if (pasted) {
+        const count = store.clipboard?.nodes.length || 0
+        toast.success(`Pasted ${count} node${count === 1 ? '' : 's'}`)
+      } else {
+        toast.warning('No nodes in clipboard')
+      }
+      return
+    }
+
     // Select all nodes (Cmd+A / Ctrl+A)
     if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
       event.preventDefault()
