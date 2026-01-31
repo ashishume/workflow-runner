@@ -1,12 +1,11 @@
 <script setup lang="ts">
   import { computed, markRaw, ref } from 'vue'
 
-  import { useEventListener } from '@vueuse/core'
-
   import { Background } from '@vue-flow/background'
   import { Controls } from '@vue-flow/controls'
   import { MarkerType, VueFlow, useVueFlow } from '@vue-flow/core'
   import { MiniMap } from '@vue-flow/minimap'
+  import { useEventListener } from '@vueuse/core'
 
   import { ArrowDownIcon, PlusRectIcon } from '../assets/icons'
   import { useToast } from '../composables/useToast'
@@ -93,7 +92,7 @@
           store.selectedNodeIds.delete(change.id)
           if (store.selectedNodeId === change.id) {
             const remaining = Array.from(store.selectedNodeIds)
-            store.selectedNodeId = remaining.length === 1 ? remaining[0] ?? null : null
+            store.selectedNodeId = remaining.length === 1 ? (remaining[0] ?? null) : null
           }
         }
       } else if (change.type === 'remove') {
@@ -176,7 +175,10 @@
   }
 
   // Node click handler
-  const onNodeClick = (nodeMouseEvent: { node: { id: string }; event: MouseEvent | TouchEvent }) => {
+  const onNodeClick = (nodeMouseEvent: {
+    node: { id: string }
+    event: MouseEvent | TouchEvent
+  }) => {
     const { node, event } = nodeMouseEvent
     // Handle multi-select with Ctrl/Cmd (only for mouse events)
     if (event instanceof MouseEvent && (event.ctrlKey || event.metaKey)) {
@@ -250,6 +252,7 @@
     <VueFlow
       :nodes="nodes"
       :edges="edges"
+      :only-render-visible-elements="true"
       :node-types="nodeTypes"
       :default-viewport="{ x: 0, y: 0, zoom: 1 }"
       :min-zoom="0.2"
